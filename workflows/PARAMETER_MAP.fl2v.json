@@ -1,0 +1,17 @@
+{
+  "workflow_file": "minimax_h3_fl2v_api.json",
+  "core_node": "105:104",
+  "save_node": "92",
+  "prompt_target": { "node": "105:104", "input": "prompt" },
+  "duration_target": { "node": "105:111", "input": "value" },
+  "seed_target": { "node": "105:15", "input": "noise_seed" },
+  "width_target": { "node": "105:104", "input": "width" },
+  "height_target": { "node": "105:104", "input": "height" },
+  "first_frame_target": { "node": "105:104", "input": "first_frame" },
+  "last_frame_target": { "node": "105:104", "input": "last_frame" },
+  "scaler_defaults": {
+    "upscale_method": "nearest-exact",
+    "resolution_steps": 32
+  },
+  "notes": "width/height are always derived adaptively from the scaled first_frame image via ImageScaleToTotalPixels + GetImageSize (node 119/120 in the base graph), matching the only ratio value this workflow_type accepts ('adaptive')."
+}

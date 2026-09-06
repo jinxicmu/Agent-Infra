@@ -1,0 +1,34 @@
+{
+  "MiniMax-H3": {
+    "resolutions": {
+      "768P": {
+        "megapixels": 0.98,
+        "resolution_steps": 32
+      }
+    },
+    "durations": {
+      "5": {
+        "validated": true
+      }
+    },
+    "ratio_policy": {
+      "t2v": {
+        "ratio_required": true,
+        "allowed": [],
+        "note": "t2v disabled; no ratio policy validated yet"
+      },
+      "i2v_first": {
+        "ratio_required": false,
+        "allowed": ["adaptive"]
+      },
+      "i2v_last": {
+        "ratio_required": false,
+        "allowed": ["adaptive"]
+      },
+      "fl2v": {
+        "ratio_required": false,
+        "allowed": ["adaptive"]
+      }
+    }
+  }
+}

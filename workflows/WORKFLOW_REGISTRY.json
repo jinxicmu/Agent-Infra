@@ -1,0 +1,24 @@
+{
+  "MiniMax-H3": {
+    "t2v": {
+      "enabled": false,
+      "workflow_file": null,
+      "reason": "Not yet validated end-to-end; the underlying node supports it (no images connected) but no test has been run."
+    },
+    "i2v_first": {
+      "enabled": false,
+      "workflow_file": null,
+      "reason": "No dedicated i2v checkpoint validated yet; will enable once added and tested."
+    },
+    "i2v_last": {
+      "enabled": false,
+      "workflow_file": null,
+      "reason": "No dedicated i2v checkpoint validated yet; will enable once added and tested."
+    },
+    "fl2v": {
+      "enabled": true,
+      "workflow_file": "minimax_h3_fl2v_api.json",
+      "parameter_map": "PARAMETER_MAP.fl2v.json"
+    }
+  }
+}
