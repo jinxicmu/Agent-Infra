@@ -1,4 +1,6 @@
 import hashlib
+import json
+from workflows.parameters import validate_output
 from google.api_core.exceptions import NotFound
 from cloudrun.errors import ApiError
 
@@ -20,5 +22,15 @@ class ResultVerifier:
         if (not blob.size or blob.content_type != 'video/mp4' or not blob.crc32c or
                 any(metadata.get(key) != value for key, value in expected.items())):
             raise ApiError(409, 'RESULT_VERIFICATION_FAILED')
-        return {'gcs_generation': str(blob.generation),
+        result = {}
+        if task.get('parameter_version') == 1:
+            try:
+                output = json.loads(metadata['output_spec'])
+                req = task['request']
+                validate_output(output, req['resolution'], req['ratio'], req['duration'])
+            except (KeyError, ValueError, TypeError, OverflowError):
+                raise ApiError(409, 'RESULT_VERIFICATION_FAILED') from None
+            result['output'] = {key: output[key] for key in
+                                ('width', 'height', 'fps', 'frame_count', 'duration_seconds')}
+        return {**result, 'gcs_generation': str(blob.generation),
                 'checksum': {'algorithm': 'crc32c', 'value': blob.crc32c}, 'output_bytes': blob.size}

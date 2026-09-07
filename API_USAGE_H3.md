@@ -6,7 +6,7 @@ Base URL：`https://ai-studio-h3-jvljvcyoaa-uc.a.run.app`
 
 创建：`POST /v2/video_generation`。鉴权：`Authorization: Bearer <client API key>`。建议每个逻辑请求携带唯一 `Idempotency-Key`，网络重试沿用相同 key 和请求内容。
 
-当前使用 “MiniMax H3 - Turbo 4step 768p - Sage 41s” 的源工作流：固定 1344×768、24 fps、四步采样及原生音频。参数使用 `resolution: "768P"`、`duration: 5`、`ratio: "16:9"`。旧的 `adaptive` 返回 `INVALID_RATIO_FOR_WORKFLOW`。
+当前使用 “MiniMax H3 - Turbo 4step 768p - Sage 41s” 的源工作流：24 fps、四步采样及原生音频。`resolution` 支持 `480P / 720P / 768P`；`duration` 为 1–15 的整数；`ratio` 支持常用横竖比例、方形和 `adaptive`。三项均可省略，默认 `768P / 5 / 16:9`。档位按像素预算计算，实际宽高对齐到 32 的倍数；完整尺寸表见客户端指南。
 
 ## 仅传首帧（I2V）
 
@@ -51,7 +51,7 @@ Base URL：`https://ai-studio-h3-jvljvcyoaa-uc.a.run.app`
 
 API 接收图片下载地址，不接收浏览器登录凭证。`storage.cloud.google.com` 是登录后的存储访问入口，不能直接作为无凭证 worker 的图片地址；私有对象应使用有效期覆盖排队与下载时间的 GCS 签名 GET URL。使用标准 TLS，不能关闭证书校验。带下划线的 bucket 使用 path-style URL，可避免虚拟主机名的证书匹配问题。
 
-提示词原样传递。示例中的“时长：4s”是提示词文本，不会更改 API 的 `duration: 5`。源帧数公式得到 124 帧，24 fps 下视频实际约 5.167 秒。
+提示词原样传递。若要改变时长，修改 `duration`，例如 `4`；提示词中的时长文字不覆盖该字段。帧数向上对齐到 `17k+5`，例如 4 秒请求为 107 帧、约 4.458 秒；5 秒请求为 124 帧、约 5.167 秒。成功结果的 `task.output` 返回实测宽高、fps、帧数和时长。
 
 创建返回 `task_id` 后，轮询 `GET /v2/query/video_generation?task_id=<id>`。成功时 `task.content` 返回私有视频的 `gcs_uri`、`gcs_generation`、`checksum`。访问历史输出需要对应 GCS 读取权限。
 

@@ -1,6 +1,6 @@
 # AI Studio — MiniMax H3 API Hosting Plan V2
 
-**Revision:** V2.4 implemented design — Cloud Run control service + local dual RTX 5090 workers  
+**Revision:** V2.5 implemented design — Cloud Run control service + local dual RTX 5090 workers  
 **Date:** September 6, 2026  
 **Status:** Implemented and deployed September 6, 2026. Both local GPU workers passed I2V/FL2V generation and GCS output validation using the source-derived Sage 41s workflow; see [current workflow evidence](H3_INPUTS_E2E_REPORT.md) and [initial deployment/recovery evidence](DEPLOYMENT_REPORT_LOCAL.md).  
 **Repository:** https://github.com/jinxicmu/Agent-Infra  
@@ -105,7 +105,7 @@ Keep:
 - `GET /v2/query/video_generation?task_id=...` with the existing task response.
 - `GET /health` for public Cloud Run process liveness (`/healthz` is a container-only compatibility alias because the Google frontend intercepts it); local GPU reachability is not a Cloud Run liveness requirement.
 
-The Sage 41s update enables `MiniMax-H3`, `i2v_first` (required first frame, omitted last frame) and `fl2v` (first and last frames), `768P`, duration `5`, ratio `16:9` (fixed 1344×768), and modes `realtime` / `batch`. Both input cases use the same source-derived graph and checkpoint. Other models/workflows remain rejected. See `API_USAGE_H3.md` for request examples and `H3_INPUTS_E2E_REPORT.md` for deployment validation.
+The Sage 41s update enables `MiniMax-H3`, `i2v_first` (required first frame, omitted last frame) and `fl2v` (first and last frames), `480P` / `720P` / `768P` resolution profiles, integer durations 1–15, explicit aspect ratios or `adaptive`, and modes `realtime` / `batch`. Resolution, ratio and duration default to `768P`, `16:9` and `5` when omitted. They are configurable request fields, not immutable workflow constants. Profiles use the source total-pixel budget and 32-pixel canvas alignment; frame counts round up to the H3 17k+5 grid. Successful new tasks return measured media properties in `task.output`. Both input cases use the same source-derived graph and checkpoint. Other models/workflows remain rejected. See `API_USAGE_H3.md` for request examples and `H3_PARAMETERS_REPORT.md` for current parameter validation and `H3_INPUTS_E2E_REPORT.md` for the previous input-mode validation.
 
 Add an optional `Idempotency-Key` header on create. Scope it to the authenticated client identity. A repeated key with an identical normalized request returns the original task ID; a different request returns 409. The task is created with `status = queued`; task creation and the idempotency mapping commit in one transaction. No separate queue insertion is needed. Define a seven-day idempotency retention window and document that retries outside it can create a new task.
 

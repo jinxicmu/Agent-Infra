@@ -14,7 +14,7 @@ The approved design is [the active V2 plan](AI_STUDIO_MINIMAX_H3_API_HOSTING_PLA
 
 Live API: **https://ai-studio-h3-jvljvcyoaa-uc.a.run.app**. Liveness is `GET /health`; create/query require the client bearer credential stored in the private workstation configuration.
 
-Public API remains `POST /v2/video_generation` and `GET /v2/query/video_generation?task_id=...`. Supported inputs are MiniMax-H3 first-frame I2V and first/last-frame FL2V, 768P, five seconds, fixed 1344×768 canvas (`ratio: "16:9"`). Input requires text and one first-frame URL; the last-frame URL is optional. Create returns a task ID; clients poll the cloud for completion. Workers poll every one second, lease one task, and never prefetch.
+Public API remains `POST /v2/video_generation` and `GET /v2/query/video_generation?task_id=...`. Supported inputs are MiniMax-H3 first-frame I2V and first/last-frame FL2V, configurable `480P`/`720P`/`768P` tiers, 1–15 seconds, explicit aspect ratios or `adaptive` (defaults: `768P`, 5 seconds, `16:9`). Input requires text and one first-frame URL; the last-frame URL is optional. Create returns a task ID; clients poll the cloud for completion. Workers poll every one second, lease one task, and never prefetch.
 
 ## Tests
 

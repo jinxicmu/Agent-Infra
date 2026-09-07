@@ -36,16 +36,26 @@ The API is asynchronous: **submit → persist task ID → poll → retrieve outp
 | I2V | Exactly one `first_frame` image; omit `last_frame` entirely |
 | FL2V | Exactly one `first_frame` and one `last_frame` image |
 | Prompt | Exactly one nonempty text item; passed to the workflow verbatim |
-| Resolution | `768P`, fixed **1344×768** output canvas |
-| Ratio | `16:9` only; `adaptive` is no longer accepted |
-| Duration | Integer `5` only |
+| Resolution | `480P`, `720P`, or `768P`; default **`768P`** |
+| Ratio | `1:1`, `2:3`, `3:2`, `3:4`, `4:3`, `9:16`, `16:9`, `21:9`, or `adaptive`; default **`16:9`** |
+| Duration | Integer **1–15 seconds**; default **`5`** |
 | Output | MP4 with native audio; validated outputs are H.264 video + stereo AAC, 24 fps |
-| Actual media length | 124 frames / 24 fps ≈ **5.167 seconds** |
+| Actual media length | Snaps upward to H3’s `17k+5` frame grid at 24 fps; see `task.output` |
 | Scheduling | `realtime` or `batch` |
 
-`16:9` names the source workflow's resolution preset; its alignment produces the exact dimensions 1344×768. Input images do not change the output dimensions. The H3 node stretches the first frame to the canvas and uses aspect-preserving center cropping for the last frame; prepare images accordingly if exact framing matters.
+Resolution tiers control the total-pixel budget, following the source workflow's ResolutionSelector calculation. They are **not a promise that every aspect ratio has that exact height or short edge**. Width and height round to multiples of 32:
 
-A phrase such as “时长：4s” in the prompt remains text and does not override `duration: 5`. Output is generative; timing, motion, and spoken words are not guaranteed to match every prompt instruction exactly.
+| Tier | `16:9` | `9:16` | `1:1` |
+|---|---|---|---|
+| `480P` | 832×480 | 480×832 | 640×640 |
+| `720P` | 1280×704 | 704×1280 | 960×960 |
+| `768P` | 1344×768 | 768×1344 | 1024×1024 |
+
+For explicit ratios, input dimensions do not change this canvas. `adaptive` derives the ratio from the first image, then applies the selected tier's pixel budget and 32-pixel alignment; it does not copy the input's resolution. Adaptive input aspect ratios must be between 1:4 and 4:1. An unsupported image ratio fails during worker preparation. H3 stretches the first frame to the resulting canvas and uses aspect-preserving center cropping for the last frame.
+
+The default combination remains `768P / 16:9 / 5s`. Other tiers, ratios, and durations are request parameters and actually change the graph. Allowed combinations are not a claim that every combination has been benchmarked for speed or quality.
+
+A phrase such as “时长：4s” in the prompt remains text and does not override the `duration` field. To request four seconds, set `duration: 4`. Output is generative; timing, motion, and spoken words are not guaranteed to match every prompt instruction exactly.
 
 Both modes execute the same model/workflow. Workers choose queued realtime tasks before batch tasks, oldest first within each mode. Realtime priority does not interrupt an already running task. Batch waiting time can increase under sustained realtime traffic; there is no queue-wait SLA or promised 41-second generation time.
 
@@ -64,9 +74,9 @@ Idempotency-Key: <UNIQUE_LOGICAL_REQUEST_ID>
 |---|---|---|---|
 | `model` | string | Yes | `MiniMax-H3` |
 | `mode` | string | Yes | `realtime` or `batch` |
-| `resolution` | string | Yes | `768P` |
-| `duration` | integer | Yes | `5` |
-| `ratio` | string | Yes | `16:9` |
+| `resolution` | string | No | `480P`, `720P`, `768P`; default `768P` |
+| `duration` | integer | No | 1–15 inclusive; default `5`; floats, numeric strings, and booleans are rejected |
+| `ratio` | string | No | Ratios listed above, including `adaptive`; default `16:9` |
 | `content` | array | Yes | One text item, one first frame, optional last frame |
 | `metadata` | object | No | Accepted application metadata; does not affect inference and is not returned by the query endpoint |
 | `callback_url` | — | No | Omit; non-null values are rejected |
@@ -188,7 +198,7 @@ Poll every **2 seconds**, with jitter/backoff on transient failures. Workers' ow
 
 For the first four rows, continue polling. `scheduler_state` is a coarse stage, not a percent-complete value. Before success, `content` is null. `metrics` is usually null until successful completion; `error` is null unless a failure was recorded.
 
-### Successful response (taken from a verified I2V task)
+### Successful response example
 
 ```json
 {
@@ -214,6 +224,7 @@ For the first four rows, continue polling. `scheduler_state` is a coarse stage, 
     "task_type": "generation",
     "modality": "video",
     "usage": {"input_image_count": 1, "output_seconds": 5},
+    "output": {"width": 1344, "height": 768, "fps": 24.0, "frame_count": 124, "duration_seconds": 5.167},
     "metrics": {
       "inference_time_ms": 48563,
       "queue_time_ms": 2162,
@@ -225,7 +236,11 @@ For the first four rows, continue polling. `scheduler_state` is a coarse stage, 
 }
 ```
 
-This is a historical example belonging to the test client; it is not a task that an independently issued client key can necessarily query.
+Identifiers and timings above illustrate a test-client result, with the current output-specification fields shown. An independently issued client key cannot necessarily query that task.
+
+`task.output` contains **measured output properties** from the generated MP4 after upload verification: `width`, `height`, `fps`, `frame_count`, and `duration_seconds`. It is null before completion and can also be null for tasks created before this feature. The top-level `resolution`, `ratio`, and `duration` retain the normalized **request parameters**, including applied defaults.
+
+Frame alignment uses `n = max(5, round(duration * 24))`, then `frames = n + (5 - n % 17) % 17`. For example, 1s → 39 frames (~1.625s), 4s → 107 frames (~4.458s), 5s → 124 frames (~5.167s), 6s → 158 frames (~6.583s), and 15s → 362 frames (~15.083s). The exact container duration may differ slightly because of audio/muxing. Use `task.output.duration_seconds` when exact media duration matters.
 
 Timestamps are UTC Unix **seconds**; metric durations are **milliseconds**. `queue_time_ms` includes preparation until the first observed running phase, not just queue residence. `inference_time_ms` is execution-stage wall-clock time, not pure GPU sampling time. Short uploads may finish between heartbeats and show zero upload time, with that interval included in execution time. `usage.output_seconds` reflects requested duration, not exact encoded media duration or a pricing statement.
 
@@ -294,8 +309,8 @@ Use `error.code` and the HTTP status for program logic, not message text or `err
 | 400 | `INVALID_MODE` | Use `realtime` or `batch` |
 | 400 | `UNSUPPORTED_CONTENT_TYPE` / `UNSUPPORTED_CONTENT_ROLE` | Use documented content types and image roles |
 | 400 | `UNSUPPORTED_WORKFLOW_COMBINATION` | Supply one first frame and at most one last frame |
-| 400 | `UNSUPPORTED_RESOLUTION` / `UNSUPPORTED_DURATION` | Use `768P` and integer `5` |
-| 400 | `INVALID_RATIO_FOR_WORKFLOW` | Use `16:9` |
+| 400 | `UNSUPPORTED_RESOLUTION` / `UNSUPPORTED_DURATION` | Choose a supported tier and integer duration from 1–15 |
+| 400 | `INVALID_RATIO_FOR_WORKFLOW` | Choose a supported explicit ratio or `adaptive` |
 | 400 | `UNSUPPORTED_PARAMETER` | Remove unknown top-level fields / non-null callback URL |
 | 401 | `AUTH_FAILED` | Obtain or correct the client key |
 | 403 | `FORBIDDEN` | Use a client credential, not a worker credential |
@@ -475,7 +490,7 @@ This script submits through **Cloud Run HTTP**, then polls Cloud Run. It never i
 
 - Obtain a client API key and arrange output-object read access or a signed-output delivery mechanism.
 - Upload a test image and confirm its direct download URL works without browser cookies.
-- Submit first-frame-only and first/last-frame cases using `768P`, `5`, and `16:9`.
+- Start with default parameters, then test explicit tier/ratio/duration values; compare requested parameters with measured `task.output`.
 - Persist the idempotency key/payload before POST, then the returned task ID.
 - Handle both terminal task statuses, transient HTTP failures, and client-side waiting timeouts.
 - Save result generation/checksum and verify the downloaded output.

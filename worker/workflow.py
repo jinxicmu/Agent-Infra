@@ -5,6 +5,8 @@ from functools import lru_cache
 from pathlib import Path
 
 from worker.image_fetcher import fetch_image
+from PIL import Image
+from workflows.parameters import validate_parameters, canvas
 
 
 @lru_cache(maxsize=8)
@@ -30,8 +32,7 @@ def build_prompt_graph(assignment, settings, check=lambda: None) -> dict:
     if roles.count('first_frame') != 1 or roles.count('last_frame') > 1 or any(
             role not in {'first_frame', 'last_frame'} for role in roles):
         raise ValueError('H3 requires one first_frame and at most one last_frame')
-    if req['duration'] != manifest['duration'] or req['ratio'] != manifest['ratio']:
-        raise ValueError('Request does not match this workflow duration/ratio')
+    validate_parameters(req['resolution'], req['ratio'], req['duration'])
 
     def bind(name, value):
         target = binding[name]
@@ -56,4 +57,12 @@ def build_prompt_graph(assignment, settings, check=lambda: None) -> dict:
         graph[node_id] = {'class_type': 'LoadImage', 'inputs': {'image': filename},
                           '_meta': {'title': f'Load Image ({role})'}}
         bind(f'{role}_target', [node_id, 0])
+    image_size = None
+    if req['ratio'] == 'adaptive':
+        with Image.open(settings.input_dir / graph[binding['image_nodes']['first_frame']]['inputs']['image']) as image:
+            image_size = image.size
+    width, height = canvas(req['resolution'], req['ratio'], image_size)
+    bind('width_target', width)
+    bind('height_target', height)
+    graph.pop(binding['resolution_node'], None)
     return graph

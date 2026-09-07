@@ -30,9 +30,10 @@
     "node": "105:104",
     "input": "last_frame"
   },
-  "notes": "Source-derived fixed 1344x768 canvas from ResolutionSelector 115. Connect both images directly to H3; its native resizing handles first/last frame conditioning. Preserve prompt text verbatim.",
+  "notes": "Request parameters determine canvas and duration. Defaults reproduce source 1344x768/5s. LoadImage connects directly to H3; adaptive ratio uses first-frame dimensions without pre-scaling.",
   "image_nodes": {
     "first_frame": "114",
     "last_frame": "121"
-  }
+  },
+  "resolution_node": "115"
 }

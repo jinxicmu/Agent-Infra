@@ -1,4 +1,5 @@
 from cloudrun.errors import ApiError
+from workflows.parameters import validate_parameters, ParameterError
 
 
 def validate(req):
@@ -16,10 +17,8 @@ def validate(req):
     if roles.count('first_frame') != 1 or roles.count('last_frame') > 1 or any(
             role not in {'first_frame', 'last_frame'} for role in roles):
         raise ApiError(400, 'UNSUPPORTED_WORKFLOW_COMBINATION')
-    if req.resolution != '768P':
-        raise ApiError(400, 'UNSUPPORTED_RESOLUTION')
-    if req.duration != 5:
-        raise ApiError(400, 'UNSUPPORTED_DURATION')
-    if req.ratio != '16:9':
-        raise ApiError(400, 'INVALID_RATIO_FOR_WORKFLOW')
+    try:
+        validate_parameters(req.resolution, req.ratio, req.duration)
+    except ParameterError as exc:
+        raise ApiError(400, exc.code) from None
     return req.model_dump(exclude_none=True)

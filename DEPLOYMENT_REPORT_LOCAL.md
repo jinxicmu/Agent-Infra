@@ -1,5 +1,7 @@
 # Local dual-GPU deployment
 
+> 最新参数能力与部署见 [H3_PARAMETERS_REPORT.md](H3_PARAMETERS_REPORT.md)；本文件保留之前版本的验证记录。
+
 > Current workflow/API update: first-frame I2V and first/last-frame FL2V are deployed and validated. See [current deployment and E2E report](H3_INPUTS_E2E_REPORT.md). The details below record the initial deployment.
 
 Deployed September 6, 2026, in GCP project `novvy-dev` and region `us-central1`.

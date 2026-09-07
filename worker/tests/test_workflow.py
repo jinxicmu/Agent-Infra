@@ -14,7 +14,7 @@ def test_fixed_seed_and_independent_inputs(tmp_path, monkeypatch):
     fetch = Mock(side_effect=lambda url, task, role, directory, check: f'{task}_{role}.png')
     monkeypatch.setattr('worker.workflow.fetch_image', fetch)
     settings = SimpleNamespace(manifest=manifest, workflow_dir=root, input_dir=tmp_path)
-    task = {'task_id':'gen_a', 'seed':112233, 'request':{'duration':5,'ratio':'16:9',
+    task = {'task_id':'gen_a', 'seed':112233, 'request':{'duration':5,'resolution':'768P','ratio':'16:9',
         'content':[{'type':'text','text':'move'},
                    {'type':'image_url','role':'first_frame','image_url':'https://example.com/a'},
                    {'type':'image_url','role':'last_frame','image_url':'https://example.com/b'}]}}
@@ -64,7 +64,7 @@ def test_runtime_only_binds_request_inputs_preserving_audio_and_source(tmp_path,
                         lambda url, task, role, directory, check: f'{task}_{role}.png')
     text = '镜头切入。\n台词：你这些症状从什么时候开始的？\n音效：语音清晰\nMusic: quiet piano.\n'
     task = {'task_id': 'gen_first', 'seed': 123, 'request': {
-        'duration': 5, 'ratio': '16:9', 'content': [
+        'duration': 5, 'resolution':'768P', 'ratio': '16:9', 'content': [
             {'type': 'text', 'text': text},
             {'type': 'image_url', 'role': 'last_frame', 'image_url': 'https://example.com/b'},
             {'type': 'image_url', 'role': 'first_frame', 'image_url': 'https://example.com/a'}]}}
@@ -83,8 +83,8 @@ def test_runtime_only_binds_request_inputs_preserving_audio_and_source(tmp_path,
     assert graph['114']['inputs']['image'] == 'gen_first_first_frame.png'
     assert graph['105:15']['inputs']['noise_seed'] == 123
     assert second['105:15']['inputs']['noise_seed'] == 456
-    task['request']['ratio'] = 'adaptive'
-    with pytest.raises(ValueError, match='duration/ratio'):
+    task['request']['ratio'] = '5:1'
+    with pytest.raises(ValueError, match='INVALID_RATIO_FOR_WORKFLOW'):
         build_prompt_graph(task, settings)
 
 
@@ -106,7 +106,7 @@ def test_optional_last_frame_never_reuses_previous_task_conditioning(tmp_path, m
     fetch = Mock(side_effect=lambda url, task, role, directory, check: f'{task}_{role}.png')
     monkeypatch.setattr('worker.workflow.fetch_image', fetch)
     task = {'task_id': 'gen_both', 'seed': 123, 'request': {
-        'duration': 5, 'ratio': '16:9', 'content': [
+        'duration': 5, 'resolution':'768P', 'ratio': '16:9', 'content': [
             {'type': 'text', 'text': '自然对白'},
             {'type': 'image_url', 'role': 'first_frame', 'image_url': 'https://example.com/a'},
             {'type': 'image_url', 'role': 'last_frame', 'image_url': 'https://example.com/b'}]}}
@@ -125,3 +125,23 @@ def test_optional_last_frame_never_reuses_previous_task_conditioning(tmp_path, m
     task['request']['content'][-1]['role'] = 'last_frame'
     with pytest.raises(ValueError, match='one first_frame'):
         build_prompt_graph(task, settings)
+
+
+@pytest.mark.parametrize('resolution,ratio,duration,dimensions', [
+    ('480P','9:16',4,(480,832)), ('720P','1:1',1,(960,960)),
+    ('768P','adaptive',6,(768,1344))])
+def test_request_controls_canvas_and_duration(tmp_path,monkeypatch,resolution,ratio,duration,dimensions):
+    from PIL import Image
+    root=Path(__file__).resolve().parents[2]/'workflows'
+    manifest=json.loads((root/'CAPABILITIES.json').read_text())
+    settings=SimpleNamespace(manifest=manifest,workflow_dir=root,input_dir=tmp_path)
+    Image.new('RGB',(768,1376)).save(tmp_path/'first.png')
+    monkeypatch.setattr('worker.workflow.fetch_image',lambda *a:'first.png')
+    task={'task_id':'gen_parameters','seed':42,'request':{'duration':duration,'ratio':ratio,'resolution':resolution,'content':[
+        {'type':'text','text':'move naturally'},
+        {'type':'image_url','role':'first_frame','image_url':'https://example.com/image'}]}}
+    graph=build_prompt_graph(task,settings)
+    assert (graph['105:104']['inputs']['width'],graph['105:104']['inputs']['height'])==dimensions
+    assert graph['105:111']['inputs']['value']==duration
+    assert '115' not in graph
+    assert 'last_frame' not in graph['105:104']['inputs']

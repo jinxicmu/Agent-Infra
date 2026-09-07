@@ -73,7 +73,7 @@ class TaskStore:
             used = previous_rate.get('count', 0) if previous_rate.get('window') == window else 0
             if used >= self.s.client_rpm:
                 raise ApiError(429, 'RATE_LIMITED')
-            task = dict(task_id=task_id, request=request, client_id=client, model=request['model'],
+            task = dict(task_id=task_id, request=request, parameter_version=1, client_id=client, model=request['model'],
                         workflow_type=('fl2v' if any(c.get('role') == 'last_frame' and c['type'] == 'image_url'
                                                     for c in request['content']) else 'i2v_first'),
                         mode=request['mode'], status='queued',

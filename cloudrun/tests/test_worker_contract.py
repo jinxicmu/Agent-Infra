@@ -13,7 +13,8 @@ def test_worker_finishes_task_through_real_api_contract(store, settings, request
     output = tmp_path/'output'
     output.mkdir()
     subprocess.run(['ffmpeg', '-v', 'error', '-f', 'lavfi', '-i', 'color=size=32x32:rate=1',
-                    '-t', '1', '-c:v', 'libx264', str(output/'sample.mp4')], check=True)
+                    '-f', 'lavfi', '-i', 'anullsrc=r=48000:cl=stereo',
+                    '-t', '1', '-c:v', 'libx264', '-c:a', 'aac', str(output/'sample.mp4')], check=True)
     verifier = Mock()
     verifier.verify.return_value = {'gcs_generation':'999', 'checksum':{'algorithm':'crc32c','value':'AAAAAA=='}}
     with TestClient(create_app(settings, store, verifier)) as api:

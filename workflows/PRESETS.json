@@ -1,16 +1,64 @@
 {
   "MiniMax-H3": {
     "resolutions": {
+      "480P": {
+        "megapixels": 0.3828125,
+        "resolution_steps": 32
+      },
+      "720P": {
+        "megapixels": 0.861328125,
+        "resolution_steps": 32
+      },
       "768P": {
         "megapixels": 0.98,
-        "resolution_steps": 32,
-        "width": 1344,
-        "height": 768
+        "resolution_steps": 32
       }
     },
     "durations": {
+      "1": {
+        "validated": false
+      },
+      "2": {
+        "validated": false
+      },
+      "3": {
+        "validated": false
+      },
+      "4": {
+        "validated": false
+      },
       "5": {
         "validated": true
+      },
+      "6": {
+        "validated": false
+      },
+      "7": {
+        "validated": false
+      },
+      "8": {
+        "validated": false
+      },
+      "9": {
+        "validated": false
+      },
+      "10": {
+        "validated": false
+      },
+      "11": {
+        "validated": false
+      },
+      "12": {
+        "validated": false
+      },
+      "13": {
+        "validated": false
+      },
+      "14": {
+        "validated": false
+      },
+      "15": {
+        "validated": false
       }
     },
     "ratio_policy": {
@@ -22,7 +70,15 @@
       "i2v_first": {
         "ratio_required": false,
         "allowed": [
-          "16:9"
+          "1:1",
+          "2:3",
+          "3:2",
+          "3:4",
+          "4:3",
+          "9:16",
+          "16:9",
+          "21:9",
+          "adaptive"
         ]
       },
       "i2v_last": {
@@ -34,9 +90,22 @@
       "fl2v": {
         "ratio_required": false,
         "allowed": [
-          "16:9"
+          "1:1",
+          "2:3",
+          "3:2",
+          "3:4",
+          "4:3",
+          "9:16",
+          "16:9",
+          "21:9",
+          "adaptive"
         ]
       }
+    },
+    "defaults": {
+      "resolution": "768P",
+      "ratio": "16:9",
+      "duration": 5
     }
   }
 }

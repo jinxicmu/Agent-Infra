@@ -1,5 +1,6 @@
 from typing import Literal, Optional
 from pydantic import BaseModel, Field, ConfigDict
+from workflows.parameters import DEFAULTS
 
 
 class ContentItem(BaseModel):
@@ -14,9 +15,9 @@ class CreateVideoRequest(BaseModel):
     model: str
     mode: Literal["realtime", "batch"]
     content: list[ContentItem] = Field(description="One text prompt and one first_frame image are required; last_frame image is optional.")
-    resolution: str
-    duration: int
-    ratio: str
+    resolution: str = DEFAULTS["resolution"]
+    duration: int = Field(default=DEFAULTS["duration"], strict=True)
+    ratio: str = DEFAULTS["ratio"]
     callback_url: Optional[str] = None
     metadata: Optional[dict] = None
 
@@ -45,6 +46,14 @@ class TaskContent(BaseModel):
     object: Optional[str] = None
 
 
+class OutputMedia(BaseModel):
+    width: int
+    height: int
+    fps: float
+    frame_count: int
+    duration_seconds: float
+
+
 class Task(BaseModel):
     id: str
     model: str
@@ -61,6 +70,7 @@ class Task(BaseModel):
     workflow_type: str
     scheduler_state: Optional[str] = None
     usage: Optional[TaskUsage] = None
+    output: Optional[OutputMedia] = None
     metrics: Optional[TaskMetrics] = None
     error: Optional[dict] = None
 

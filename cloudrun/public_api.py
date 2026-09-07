@@ -47,4 +47,5 @@ def query(task_id: str, request: Request, client=Depends(client_identity)):
         'scheduler_state': task['status'], 'task_type': 'generation', 'modality': 'video',
         'usage': {'input_image_count': sum(c['type'] == 'image_url' for c in req['content']), 'output_seconds': req['duration']},
         'metrics': task.get('metrics'), 'error': task.get('error'),
+        'output': task.get('output'),
     }}

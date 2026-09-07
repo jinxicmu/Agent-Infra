@@ -7,7 +7,7 @@ from cloudrun.validation import validate
 def test_fixed_source_canvas_is_explicit_in_api(request_body):
     assert validate(CreateVideoRequest(**request_body))['ratio'] == '16:9'
     with pytest.raises(ApiError) as error:
-        validate(CreateVideoRequest(**{**request_body, 'ratio': 'adaptive'}))
+        validate(CreateVideoRequest(**{**request_body, 'ratio': '5:1'}))
     assert error.value.code == 'INVALID_RATIO_FOR_WORKFLOW'
 
 
