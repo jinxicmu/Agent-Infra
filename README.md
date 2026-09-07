@@ -8,6 +8,7 @@ The approved design is [the active V2 plan](AI_STUDIO_MINIMAX_H3_API_HOSTING_PLA
 
 - [Cloud deployment](cloudrun/deploy/README.md)
 - [Local GPU worker rollout](worker/deploy/README.md)
+- [Open workflows in the ComfyUI frontend](workflows/comfyui/README.md)
 - [Ref2VA 接入与验证](REF2VA_REPORT.md)
 - [Validation report](IMPLEMENTATION_REPORT.md)
 - [Live deployment report](DEPLOYMENT_REPORT_LOCAL.md)
@@ -29,3 +30,5 @@ FIRESTORE_EMULATOR_HOST=127.0.0.1:8787 .venv/bin/python -m pytest
 Database tests use only emulator project `demo-agent-infra` and clear that project's test collections before each test. They skip when the emulator variable is absent. Never point that variable at a production endpoint. Worker tests simulate ComfyUI/GCS failures without rendering or uploading production objects.
 
 The workflow manifest binds the approved graph/registry/preset hashes to a revision. Intentional workflow changes require regenerating its hashes/revision and coordinated cloud/worker rollout. Workers reject modified artifacts. Do not enable unvalidated models or workflows merely by changing the manifest.
+
+Every newly enabled workflow must also ship an editable [ComfyUI library entry](workflows/comfyui/README.md), installed in each active instance and verified through frontend export and native prompt validation.
