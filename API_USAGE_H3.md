@@ -1,4 +1,4 @@
-# MiniMax-H3 API：首帧必填，末帧可选
+# MiniMax-H3 API：I2V / FL2V / Ref2VA
 
 完整的客户端接入文档（字段、响应、错误码、幂等重试、Python/curl 示例）：[API_CLIENT_GUIDE.md](API_CLIENT_GUIDE.md)。
 
@@ -6,7 +6,7 @@ Base URL：`https://ai-studio-h3-jvljvcyoaa-uc.a.run.app`
 
 创建：`POST /v2/video_generation`。鉴权：`Authorization: Bearer <client API key>`。建议每个逻辑请求携带唯一 `Idempotency-Key`，网络重试沿用相同 key 和请求内容。
 
-当前使用 “MiniMax H3 - Turbo 4step 768p - Sage 41s” 的源工作流：24 fps、四步采样及原生音频。`resolution` 支持 `480P / 720P / 768P`；`duration` 为 1–15 的整数；`ratio` 支持常用横竖比例、方形和 `adaptive`。三项均可省略，默认 `768P / 5 / 16:9`。档位按像素预算计算，实际宽高对齐到 32 的倍数；完整尺寸表见客户端指南。
+I2V/FL2V 使用 “MiniMax H3 - Turbo 4step 768p - Sage 41s” 的源工作流：24 fps、四步采样及原生音频。`resolution` 支持 `480P / 544P / 720P / 768P`；`duration` 为 1–15 的整数；`ratio` 支持常用横竖比例、方形和 `adaptive`。三项均可省略，默认 `768P / 5 / 16:9`。档位按像素预算计算，实际宽高对齐到 32 的倍数；完整尺寸表见客户端指南。
 
 ## 仅传首帧（I2V）
 
@@ -46,6 +46,25 @@ Base URL：`https://ai-studio-h3-jvljvcyoaa-uc.a.run.app`
 ```
 
 查询结果的 `workflow_type` 为 `fl2v`，`usage.input_image_count` 为 `2`。首尾帧可以使用同一图片 URL；角色必须各出现一次。缺少首帧、重复角色、仅文本请求仍被拒绝。
+
+## 参考图生成音视频（Ref2VA）
+
+```json
+{
+  "model": "MiniMax-H3",
+  "workflow_type": "ref2va",
+  "mode": "realtime",
+  "resolution": "544P",
+  "duration": 5,
+  "ratio": "16:9",
+  "content": [
+    {"type": "text", "text": "参考 <Picture 1> 的人物和场景，女医生抬头看向患者，说：你这些症状从什么时候开始的？语音清晰。"},
+    {"type": "image_url", "role": "reference_image", "image_url": "<参考图 HTTPS URL>"}
+  ]
+}
+```
+
+接受 1–9 张参考图，按提交顺序对应 `<Picture 1>` 至 `<Picture N>`；不能混入首尾帧角色。默认 `544P / 16:9 / 5s`，参数仍可修改。使用 Ref2VA 独立模型、Turbo v0.1 四步 LoRA、Euler/simple、video/audio shift 12/3 和 `match` 参考图缩放。参考图引导身份和内容，不作为固定首尾帧。此版本仅开放图片参考输入，输出包含原生音频。
 
 ## 输入地址、时长和结果
 

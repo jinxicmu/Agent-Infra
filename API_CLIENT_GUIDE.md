@@ -1,6 +1,6 @@
 # Agent-Infra Video Generation API — Client Integration Guide
 
-Last verified: 2026-09-06. This guide describes the deployed public API, including first-frame-only I2V and first/last-frame FL2V. Examples contain placeholders, not credentials.
+Last verified: 2026-09-06. This guide describes the deployed public API, including first-frame-only I2V, first/last-frame FL2V, and image-reference Ref2VA. Examples contain placeholders, not credentials.
 
 ## 1. Connection and authentication
 
@@ -35,8 +35,9 @@ The API is asynchronous: **submit → persist task ID → poll → retrieve outp
 | Model | `MiniMax-H3` |
 | I2V | Exactly one `first_frame` image; omit `last_frame` entirely |
 | FL2V | Exactly one `first_frame` and one `last_frame` image |
+| Ref2VA | 1–9 `reference_image` items; generates video with native audio |
 | Prompt | Exactly one nonempty text item; passed to the workflow verbatim |
-| Resolution | `480P`, `720P`, or `768P`; default **`768P`** |
+| Resolution | `480P`, `544P`, `720P`, or `768P`; default **`544P` for Ref2VA**, **`768P` for I2V/FL2V** |
 | Ratio | `1:1`, `2:3`, `3:2`, `3:4`, `4:3`, `9:16`, `16:9`, `21:9`, or `adaptive`; default **`16:9`** |
 | Duration | Integer **1–15 seconds**; default **`5`** |
 | Output | MP4 with native audio; validated outputs are H.264 video + stereo AAC, 24 fps |
@@ -48,12 +49,13 @@ Resolution tiers control the total-pixel budget, following the source workflow's
 | Tier | `16:9` | `9:16` | `1:1` |
 |---|---|---|---|
 | `480P` | 832×480 | 480×832 | 640×640 |
+| `544P` | 960×544 | 544×960 | 736×736 |
 | `720P` | 1280×704 | 704×1280 | 960×960 |
 | `768P` | 1344×768 | 768×1344 | 1024×1024 |
 
-For explicit ratios, input dimensions do not change this canvas. `adaptive` derives the ratio from the first image, then applies the selected tier's pixel budget and 32-pixel alignment; it does not copy the input's resolution. Adaptive input aspect ratios must be between 1:4 and 4:1. An unsupported image ratio fails during worker preparation. H3 stretches the first frame to the resulting canvas and uses aspect-preserving center cropping for the last frame.
+For explicit ratios, input dimensions do not change this canvas. `adaptive` derives the ratio from the first image, then applies the selected tier's pixel budget and 32-pixel alignment; it does not copy the input's resolution. Adaptive input aspect ratios must be between 1:4 and 4:1. An unsupported image ratio fails during worker preparation. I2V/FL2V stretches the first frame to the resulting canvas and uses aspect-preserving center cropping for the last frame. Ref2VA instead uses `match`: preserve each reference image’s aspect ratio, scale down to the canvas pixel budget, and never crop or upscale (apart from 32-pixel rounding). For Ref2VA, `adaptive` uses the first reference image.
 
-The default combination remains `768P / 16:9 / 5s`. Other tiers, ratios, and durations are request parameters and actually change the graph. Allowed combinations are not a claim that every combination has been benchmarked for speed or quality.
+The I2V/FL2V default remains `768P / 16:9 / 5s`; Ref2VA defaults to `544P / 16:9 / 5s`. Other tiers, ratios, and durations are request parameters and actually change the graph. Allowed combinations are not a claim that every combination has been benchmarked for speed or quality.
 
 A phrase such as “时长：4s” in the prompt remains text and does not override the `duration` field. To request four seconds, set `duration: 4`. Output is generative; timing, motion, and spoken words are not guaranteed to match every prompt instruction exactly.
 
@@ -74,14 +76,15 @@ Idempotency-Key: <UNIQUE_LOGICAL_REQUEST_ID>
 |---|---|---|---|
 | `model` | string | Yes | `MiniMax-H3` |
 | `mode` | string | Yes | `realtime` or `batch` |
-| `resolution` | string | No | `480P`, `720P`, `768P`; default `768P` |
+| `workflow_type` | string | No | `i2v_first`, `fl2v`, or `ref2va`; inferred from image roles if omitted; if present must match them |
+| `resolution` | string | No | `480P`, `544P`, `720P`, `768P`; default `544P` for Ref2VA, otherwise `768P` |
 | `duration` | integer | No | 1–15 inclusive; default `5`; floats, numeric strings, and booleans are rejected |
 | `ratio` | string | No | Ratios listed above, including `adaptive`; default `16:9` |
-| `content` | array | Yes | One text item, one first frame, optional last frame |
+| `content` | array | Yes | One text item plus first/optional last frames OR 1–9 reference images |
 | `metadata` | object | No | Accepted application metadata; does not affect inference and is not returned by the query endpoint |
 | `callback_url` | — | No | Omit; non-null values are rejected |
 
-The entire JSON request must fit in **64 KiB**, including URLs, text, and metadata. Unknown top-level fields are rejected. Do not send a top-level `seed`, width, height, steps, or workflow selector. The service selects and persists the seed internally.
+The entire JSON request must fit in **64 KiB**, including URLs, text, and metadata. Unknown top-level fields are rejected. Do not send a top-level `seed`, width, height, or steps. The service selects and persists the seed internally.
 
 Content item formats:
 
@@ -97,7 +100,7 @@ Content item formats:
 {"type": "image_url", "role": "last_frame", "image_url": "https://example.com/last.png"}
 ```
 
-`image_url` is a **string**, not an object containing a `url` property. Image roles are required and case-sensitive. Item order does not choose the role. Only-first, first-plus-last are supported; no images, only-last, duplicate first/last roles, and empty image URLs are rejected.
+`image_url` is a **string**, not an object containing a `url` property. Image roles are required and case-sensitive. Item order does not choose the role. Use first-only, first-plus-last, or reference-only image roles. Do not mix reference images with first/last frames. No images, only-last, duplicate first/last roles, and empty image URLs are rejected. Reference-image order determines the `<Picture N>` numbering.
 
 ### Example A — first frame only (I2V)
 
@@ -144,6 +147,28 @@ Do not add an empty or null last-frame item. The task will report `workflow_type
 ```
 
 This reports `workflow_type: "fl2v"` and `usage.input_image_count: 2`. Both roles may use the same URL if the intended start and end frame are identical.
+
+### Example C — reference images to video with audio (Ref2VA)
+
+```json
+{
+  "model": "MiniMax-H3",
+  "workflow_type": "ref2va",
+  "mode": "realtime",
+  "resolution": "544P",
+  "ratio": "16:9",
+  "duration": 5,
+  "content": [
+    {"type": "text", "text": "Use the doctor in <Picture 1> and the room in <Picture 2>. The doctor looks at her patient and says: 你这些症状从什么时候开始的？ Clear dialogue and quiet room tone."},
+    {"type": "image_url", "role": "reference_image", "image_url": "https://example.com/doctor.png"},
+    {"type": "image_url", "role": "reference_image", "image_url": "https://example.com/room.png"}
+  ]
+}
+```
+
+The query reports `workflow_type: "ref2va"` and the actual `usage.input_image_count`. References guide identity/content; they are not fixed first/last frames. Use one-based `<Picture 1>` through `<Picture N>` tags in the order the images occur in `content`. Prompt text is passed verbatim; tags are not inserted or rewritten by the service.
+
+This offering exposes **image references**. Reference video/audio uploads are not API inputs in this release. Output still contains jointly generated native audio. Ref2VA uses its own pruned INT8 checkpoint and Ref2VA Turbo 4-step v0.1 LoRA, Euler/simple, video shift 12 and audio shift 3. The defaults follow the [ModelTC Ref2VA model specifications](https://github.com/ModelTC/Minimax-H3-Turbo#1-model-specs); the graph derives from the [Comfy-Org R2V template](https://github.com/Comfy-Org/workflow_templates/blob/main/templates/video_minimax_h3_r2v.json). Inference can take longer when switching model families or adding reference images.
 
 ### Input image hosting
 
@@ -308,7 +333,7 @@ Use `error.code` and the HTTP status for program logic, not message text or `err
 | 400 | `UNSUPPORTED_MODEL` | Use `MiniMax-H3` |
 | 400 | `INVALID_MODE` | Use `realtime` or `batch` |
 | 400 | `UNSUPPORTED_CONTENT_TYPE` / `UNSUPPORTED_CONTENT_ROLE` | Use documented content types and image roles |
-| 400 | `UNSUPPORTED_WORKFLOW_COMBINATION` | Supply one first frame and at most one last frame |
+| 400 | `UNSUPPORTED_WORKFLOW_COMBINATION` | Supply first/optional last frames, or 1–9 reference images; match any explicit workflow_type |
 | 400 | `UNSUPPORTED_RESOLUTION` / `UNSUPPORTED_DURATION` | Choose a supported tier and integer duration from 1–15 |
 | 400 | `INVALID_RATIO_FOR_WORKFLOW` | Choose a supported explicit ratio or `adaptive` |
 | 400 | `UNSUPPORTED_PARAMETER` | Remove unknown top-level fields / non-null callback URL |

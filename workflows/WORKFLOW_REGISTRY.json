@@ -20,6 +20,12 @@
       "enabled": true,
       "workflow_file": "minimax_h3_fl2v_api.json",
       "parameter_map": "PARAMETER_MAP.fl2v.json"
+    },
+    "ref2va": {
+      "enabled": true,
+      "workflow_file": "minimax_h3_ref2va_api.json",
+      "parameter_map": "PARAMETER_MAP.ref2va.json",
+      "save_node": "92"
     }
   }
 }

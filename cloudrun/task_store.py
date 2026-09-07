@@ -74,7 +74,7 @@ class TaskStore:
             if used >= self.s.client_rpm:
                 raise ApiError(429, 'RATE_LIMITED')
             task = dict(task_id=task_id, request=request, parameter_version=1, client_id=client, model=request['model'],
-                        workflow_type=('fl2v' if any(c.get('role') == 'last_frame' and c['type'] == 'image_url'
+                        workflow_type=request.get('workflow_type') or ('fl2v' if any(c.get('role') == 'last_frame' and c['type'] == 'image_url'
                                                     for c in request['content']) else 'i2v_first'),
                         mode=request['mode'], status='queued',
                         created_at=firestore.SERVER_TIMESTAMP, updated_at=firestore.SERVER_TIMESTAMP,

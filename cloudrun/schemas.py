@@ -6,15 +6,16 @@ from workflows.parameters import DEFAULTS
 class ContentItem(BaseModel):
     type: Literal["text", "image_url"]
     text: Optional[str] = None
-    role: Optional[Literal["first_frame", "last_frame"]] = None
+    role: Optional[Literal["first_frame", "last_frame", "reference_image"]] = None
     image_url: Optional[str] = None
 
 
 class CreateVideoRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
     model: str
+    workflow_type: Optional[Literal["i2v_first", "fl2v", "ref2va"]] = None
     mode: Literal["realtime", "batch"]
-    content: list[ContentItem] = Field(description="One text prompt and one first_frame image are required; last_frame image is optional.")
+    content: list[ContentItem] = Field(description="One text prompt plus first/optional last frames, or 1–9 reference_image items for Ref2VA.")
     resolution: str = DEFAULTS["resolution"]
     duration: int = Field(default=DEFAULTS["duration"], strict=True)
     ratio: str = DEFAULTS["ratio"]

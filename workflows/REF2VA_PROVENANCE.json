@@ -1,0 +1,28 @@
+{
+  "sources": {
+    "video_minimax_h3_r2v.json": {
+      "url": "https://raw.githubusercontent.com/Comfy-Org/workflow_templates/66abae5205f7c5105281146fa109f7c12801d268/templates/video_minimax_h3_r2v.json",
+      "commit": "66abae5205f7c5105281146fa109f7c12801d268",
+      "sha256": "14b30659a057547e02bdd4bbbdda3f8670aa6d7d81d1d8d99c4f9ad1e2eabc44"
+    },
+    "video_minimax_h3_ref2v_lightx2v_turbo.json": {
+      "url": "https://raw.githubusercontent.com/ModelTC/Minimax-H3-Turbo/50793509fc069a21f1f00139f83c244757d86ef5/example_workflows/video_minimax_h3_ref2v_lightx2v_turbo.json",
+      "commit": "50793509fc069a21f1f00139f83c244757d86ef5",
+      "sha256": "b906a154f9a45047714c43c038d345a6c645fda44e53f3b6f6aef23d3e179028"
+    }
+  },
+  "models": [
+    {
+      "path": "diffusion_models/minimax_h3_ref2va_pruned_int8_convrot.safetensors",
+      "url": "https://huggingface.co/Comfy-Org/MiniMax-H3/resolve/a98869194787969724c7425d95d0ed73ce9202af/diffusion_models/minimax_h3_ref2va_pruned_int8_convrot.safetensors",
+      "size": 20970379616,
+      "sha256": "9255f52b6677845ad238f20dfaafa94727053694127ab7f255c048f0f9365779"
+    },
+    {
+      "path": "loras/minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors",
+      "url": "https://huggingface.co/Comfy-Org/MiniMax-H3/resolve/a98869194787969724c7425d95d0ed73ce9202af/loras/minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors",
+      "size": 1956193000,
+      "sha256": "5b9ab5ade15d0775676d01a907268a69a1468dc6033b3b0d3ded5502f3ebb84c"
+    }
+  ]
+}

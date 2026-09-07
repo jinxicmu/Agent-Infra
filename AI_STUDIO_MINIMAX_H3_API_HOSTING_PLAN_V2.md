@@ -1,6 +1,6 @@
 # AI Studio — MiniMax H3 API Hosting Plan V2
 
-**Revision:** V2.5 implemented design — Cloud Run control service + local dual RTX 5090 workers  
+**Revision:** V2.6 implemented design — Cloud Run control service + local dual RTX 5090 workers  
 **Date:** September 6, 2026  
 **Status:** Implemented and deployed September 6, 2026. Both local GPU workers passed I2V/FL2V generation and GCS output validation using the source-derived Sage 41s workflow; see [current workflow evidence](H3_INPUTS_E2E_REPORT.md) and [initial deployment/recovery evidence](DEPLOYMENT_REPORT_LOCAL.md).  
 **Repository:** https://github.com/jinxicmu/Agent-Infra  
@@ -77,6 +77,14 @@ Claim requests drive scheduling. Cloud Run instances can be replaced or scaled b
 
 Workers have no direct Firestore access. The cloud never calls the workstation. Images and generated video bytes do not pass through Cloud Run; workers fetch approved input URLs and upload directly to GCS.
 
+### Ref2VA extension
+
+Ref2VA adds an independent graph and checkpoint using the Comfy-Org R2V template with ModelTC Ref2VA Turbo 4-step v0.1 sampling: Euler/simple, four steps, video shift 12, audio shift 3, LoRA strength 1 and `match` reference resizing. `workflow_type: "ref2va"` accepts one text item and 1–9 `image_url` items with `role: "reference_image"`. It is also inferred from these roles when the selector is omitted. Reference roles cannot mix with first/last frames. The prompt uses `<Picture N>` in image submission order; the service preserves it verbatim. This release exposes image references, with native audio in the generated video.
+
+Omitted Ref2VA parameters resolve to `544P / 16:9 / 5s` (960×544 at 16:9). All supported resolution tiers, ratios and integer durations remain client-configurable. `adaptive` uses the first reference image. Existing I2V/FL2V defaults and normalized idempotency requests remain unchanged. The registry and capability manifest identify each workflow's graph, binding map and SaveVideo output node; all graphs and source snapshots are revision-fenced. Either GPU may execute either model family, one whole task at a time; the cloud queue and lease/recovery rules remain the same.
+
+Source provenance and model hashes: `workflows/REF2VA_PROVENANCE.json`. Client contract: `API_CLIENT_GUIDE.md`. Model installation: `python -m worker.deploy.download_ref2va /path/to/ComfyUI/models`.
+
 ## 4. Two independent GPU execution units
 
 | Setting | Worker 0 | Worker 1 |
@@ -105,7 +113,7 @@ Keep:
 - `GET /v2/query/video_generation?task_id=...` with the existing task response.
 - `GET /health` for public Cloud Run process liveness (`/healthz` is a container-only compatibility alias because the Google frontend intercepts it); local GPU reachability is not a Cloud Run liveness requirement.
 
-The Sage 41s update enables `MiniMax-H3`, `i2v_first` (required first frame, omitted last frame) and `fl2v` (first and last frames), `480P` / `720P` / `768P` resolution profiles, integer durations 1–15, explicit aspect ratios or `adaptive`, and modes `realtime` / `batch`. Resolution, ratio and duration default to `768P`, `16:9` and `5` when omitted. They are configurable request fields, not immutable workflow constants. Profiles use the source total-pixel budget and 32-pixel canvas alignment; frame counts round up to the H3 17k+5 grid. Successful new tasks return measured media properties in `task.output`. Both input cases use the same source-derived graph and checkpoint. Other models/workflows remain rejected. See `API_USAGE_H3.md` for request examples and `H3_PARAMETERS_REPORT.md` for current parameter validation and `H3_INPUTS_E2E_REPORT.md` for the previous input-mode validation.
+The Sage 41s update enables `MiniMax-H3`, `i2v_first` (required first frame, omitted last frame) and `fl2v` (first and last frames), `480P` / `544P` / `720P` / `768P` resolution profiles, integer durations 1–15, explicit aspect ratios or `adaptive`, and modes `realtime` / `batch`. Resolution, ratio and duration default to `768P`, `16:9` and `5` when omitted. They are configurable request fields, not immutable workflow constants. Profiles use the source total-pixel budget and 32-pixel canvas alignment; frame counts round up to the H3 17k+5 grid. Successful new tasks return measured media properties in `task.output`. Both input cases use the same source-derived graph and checkpoint. Other models/workflows remain rejected. See `API_USAGE_H3.md` for request examples and `H3_PARAMETERS_REPORT.md` for current parameter validation and `H3_INPUTS_E2E_REPORT.md` for the previous input-mode validation.
 
 Add an optional `Idempotency-Key` header on create. Scope it to the authenticated client identity. A repeated key with an identical normalized request returns the original task ID; a different request returns 409. The task is created with `status = queued`; task creation and the idempotency mapping commit in one transaction. No separate queue insertion is needed. Define a seven-day idempotency retention window and document that retries outside it can create a new task.
 
@@ -283,7 +291,7 @@ Use `bad_request_error` for 4xx and `internal_error` for 5xx to preserve the exi
 | `INVALID_MODE` | Public API 400 | Mode is not `realtime` or `batch` |
 | `UNSUPPORTED_MODEL` | Public API 400 | Model is not enabled |
 | `UNSUPPORTED_CONTENT_TYPE` / `UNSUPPORTED_CONTENT_ROLE` | Public API 400 | Content type or image role is unsupported |
-| `UNSUPPORTED_WORKFLOW_COMBINATION` | Public API 400 | Content does not select an enabled workflow, including disabled T2V/I2V |
+| `UNSUPPORTED_WORKFLOW_COMBINATION` | Public API 400 | Content does not select an enabled workflow, including disabled text-only and last-frame-only inputs |
 | `UNSUPPORTED_RESOLUTION` / `UNSUPPORTED_DURATION` | Public API 400 | No validated preset exists |
 | `INVALID_RATIO_FOR_WORKFLOW` | Public API 400 | Ratio violates the enabled workflow's policy |
 | `UNSUPPORTED_PARAMETER` | Public API 400 | Unsupported option such as `callback_url` |

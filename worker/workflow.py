@@ -18,9 +18,15 @@ def _artifacts(workflow_dir: Path, revision: str, workflow_file: str, parameter_
 
 def build_prompt_graph(assignment, settings, check=lambda: None) -> dict:
     manifest = settings.manifest
+    req = assignment['request']
+    workflow_type = assignment.get('workflow_type') or req.get('workflow_type') or (
+        'fl2v' if any(c.get('role') == 'last_frame' for c in req['content']) else 'i2v_first')
+    if 'workflows' in manifest and workflow_type not in manifest['workflows']:
+        raise ValueError('Unsupported workflow type')
+    artifact = manifest.get('workflows', {}).get(workflow_type, manifest)
     template, binding = _artifacts(
         settings.workflow_dir.resolve(), manifest['revision'],
-        manifest['workflow_file'], manifest['parameter_map'])
+        artifact['workflow_file'], artifact['parameter_map'])
     graph = copy.deepcopy(template)
     req = assignment['request']
     content = req['content']
@@ -29,7 +35,10 @@ def build_prompt_graph(assignment, settings, check=lambda: None) -> dict:
     if len(texts) != 1 or not texts[0].strip():
         raise ValueError('H3 requires exactly one nonempty text prompt')
     roles = [item.get('role') for item in images]
-    if roles.count('first_frame') != 1 or roles.count('last_frame') > 1 or any(
+    if workflow_type == 'ref2va':
+        if not 1 <= len(images) <= 9 or any(role != 'reference_image' for role in roles):
+            raise ValueError('Ref2VA requires 1–9 reference_image inputs')
+    elif roles.count('first_frame') != 1 or roles.count('last_frame') > 1 or any(
             role not in {'first_frame', 'last_frame'} for role in roles):
         raise ValueError('H3 requires one first_frame and at most one last_frame')
     validate_parameters(req['resolution'], req['ratio'], req['duration'])
@@ -43,6 +52,25 @@ def build_prompt_graph(assignment, settings, check=lambda: None) -> dict:
     bind('duration_target', req['duration'])
     bind('seed_target', assignment['seed'])
     graph[binding['save_node']]['inputs']['filename_prefix'] = f"video/{assignment['task_id']}"
+    if workflow_type == 'ref2va':
+        first_filename = None
+        for index, item in enumerate(images):
+            check()
+            filename = fetch_image(item['image_url'], assignment['task_id'],
+                                   f'reference_image_{index}', settings.input_dir, check)
+            first_filename = first_filename or filename
+            node_id = f'ref_image_{index}'
+            graph[node_id] = {'class_type': 'LoadImage', 'inputs': {'image': filename}}
+            graph[binding['core_node']]['inputs'][f'ref_images.ref_image_{index}'] = [node_id, 0]
+        image_size = None
+        if req['ratio'] == 'adaptive':
+            with Image.open(settings.input_dir / first_filename) as image:
+                image_size = image.size
+        width, height = canvas(req['resolution'], req['ratio'], image_size)
+        bind('width_target', width)
+        bind('height_target', height)
+        graph.pop(binding['resolution_node'], None)
+        return graph
     by_role = {item['role']: item['image_url'] for item in images}
     for role in ('first_frame', 'last_frame'):
         if role not in by_role:

@@ -1,13 +1,19 @@
 {
-  "revision": "7be6926b7da2552590d82320424a8bd8c76589bd58c51a8412aa18e48052fc29",
+  "revision": "ee41720182b348be841a31cb17b7d530fee5823d8cf55c832aad2e3783decd77",
   "files": {
     "minimax_h3_fl2v_api.json": "e5126f876b5a888a158a211b65978ae2c88b583706f72115c77baa1ba0d7c9a4",
-    "PRESETS.json": "f97065703b086ca9686766f64a92941baea5777dad600753a0b8339ea577dc6b",
-    "WORKFLOW_REGISTRY.json": "1311ab671a86b00633ac6bae246bad27f95dd18be7706e38d02d1b853e2acc99",
+    "PRESETS.json": "443a751f4f5276ad3d98d3f3895a55ebb48372922b77f07e8a8e17b3fec8b9c9",
+    "WORKFLOW_REGISTRY.json": "69b2bde5e7cbdd2101b810c4845158029e07de786da27231b05ee3829da4d8f8",
     "PARAMETER_MAP.fl2v.json": "df4f71f3ad01d2ca4d2835e8341cca0c962c07c09920244cdd12f43a46d04d0d",
     "source/MiniMax H3 - Turbo 4step 768p - Sage 41s.json": "a8fb242c8efb1fdb8ff3485df46dc77d2a9231cfe1e67443933dd59c743219e1",
     "export_h3.py": "33b512ab41bce045366ed5d3ddc128171d6bf6329b748d03965627816208be2e",
-    "parameters.py": "80b5a3931176fe5f0f08a651a31eefff6bd3e53441817c7bbc534b8b3e7056f7"
+    "parameters.py": "80b5a3931176fe5f0f08a651a31eefff6bd3e53441817c7bbc534b8b3e7056f7",
+    "minimax_h3_ref2va_api.json": "e52f74c263f3f5f17d525eff96575ae260212994e9598af583135b5f071f7ef5",
+    "PARAMETER_MAP.ref2va.json": "7cc79c88daf8ddd8c1a311a055988a8340ad5aa9137e81db5c3f7788845d1f83",
+    "REF2VA_PROVENANCE.json": "26b333b6fb0b3782956e5803d3397c697e475978499fcf85d0ef955c09268522",
+    "export_ref2va.py": "e4b383bb61b2cbc7354ed363357b1741d3943a60b2a7e9b7df5fab2fa8d1fa65",
+    "source/video_minimax_h3_r2v.json": "14b30659a057547e02bdd4bbbdda3f8670aa6d7d81d1d8d99c4f9ad1e2eabc44",
+    "source/video_minimax_h3_ref2v_lightx2v_turbo.json": "b906a154f9a45047714c43c038d345a6c645fda44e53f3b6f6aef23d3e179028"
   },
   "model": "MiniMax-H3",
   "workflow_file": "minimax_h3_fl2v_api.json",
@@ -16,7 +22,25 @@
   "source_workflow": "source/MiniMax H3 - Turbo 4step 768p - Sage 41s.json",
   "workflow_types": [
     "i2v_first",
-    "fl2v"
+    "fl2v",
+    "ref2va"
   ],
-  "parameter_policy": "PRESETS.json"
+  "parameter_policy": "PRESETS.json",
+  "workflows": {
+    "i2v_first": {
+      "workflow_file": "minimax_h3_fl2v_api.json",
+      "parameter_map": "PARAMETER_MAP.fl2v.json",
+      "save_node": "92"
+    },
+    "fl2v": {
+      "workflow_file": "minimax_h3_fl2v_api.json",
+      "parameter_map": "PARAMETER_MAP.fl2v.json",
+      "save_node": "92"
+    },
+    "ref2va": {
+      "workflow_file": "minimax_h3_ref2va_api.json",
+      "parameter_map": "PARAMETER_MAP.ref2va.json",
+      "save_node": "92"
+    }
+  }
 }

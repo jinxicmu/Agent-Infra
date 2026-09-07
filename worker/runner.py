@@ -186,7 +186,8 @@ class Runner:
                 if status.get('status_str') == 'error':
                     raise ExecutionFailure('INFERENCE_FAILED')
                 if status.get('completed'):
-                    outputs = history.get('outputs', {}).get(self.s.manifest['save_node'], {})
+                    artifact = self.s.manifest.get('workflows', {}).get(task.get('workflow_type'), self.s.manifest)
+                    outputs = history.get('outputs', {}).get(artifact['save_node'], {})
                     videos = outputs.get('videos') or outputs.get('gifs') or outputs.get('images') or []
                     if not videos:
                         raise ExecutionFailure('INFERENCE_FAILED')

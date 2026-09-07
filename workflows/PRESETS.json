@@ -12,6 +12,10 @@
       "768P": {
         "megapixels": 0.98,
         "resolution_steps": 32
+      },
+      "544P": {
+        "megapixels": 0.5,
+        "resolution_steps": 32
       }
     },
     "durations": {
@@ -104,6 +108,11 @@
     },
     "defaults": {
       "resolution": "768P",
+      "ratio": "16:9",
+      "duration": 5
+    },
+    "ref2va_defaults": {
+      "resolution": "544P",
       "ratio": "16:9",
       "duration": 5
     }

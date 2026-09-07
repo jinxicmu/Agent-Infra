@@ -20,3 +20,9 @@ Do not delete a journal to fix a stuck task. A missing journal with an active cl
 Local `gen_*` inputs/outputs older than 24 hours are cleaned only when not associated with the current journal. State and credentials remain separate. New claims require 5 GiB free output space. GCS outputs are not deleted automatically. Monitor local disk, GPU health, queue age and repeated authentication failures.
 
 Rollback: stop new local claims, let current jobs drain or explicitly fail, then restore the chosen previous deployment. Never operate the RunPod dispatcher and local workers against the same pending tasks.
+
+## Ref2VA weights
+
+Run `python -m worker.deploy.download_ref2va /path/to/ComfyUI/models` from the repository with worker dependencies installed. The installer downloads the pinned Comfy-Org pruned INT8 Ref2VA checkpoint and Ref2VA Turbo 4-step v0.1 LoRA, then checks their byte sizes and SHA-256 before publishing the files. Both GPU instances share the on-disk model directory but load and execute independently. Existing Qwen text encoder and both H3 VAEs are reused. Allow about 23 GB additional disk space.
+
+Publish cloud and workers with the same workflow revision after draining active tasks. Confirm ComfyUI has `MiniMaxH3ReferenceToVideo`, `MiniMaxH3SigmaShift`, and the new model filenames before reopening submissions. Test model-family switches as well as first-use inference; CPU RAM includes both GPU processes' offloaded weights.
