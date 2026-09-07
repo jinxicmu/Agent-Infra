@@ -1,0 +1,19 @@
+{
+  "indexes": [
+    {"collectionGroup":"tasks","queryScope":"COLLECTION","fields":[
+      {"fieldPath":"mode","order":"ASCENDING"},
+      {"fieldPath":"status","order":"ASCENDING"},
+      {"fieldPath":"created_at","order":"ASCENDING"}]},
+    {"collectionGroup":"tasks","queryScope":"COLLECTION","fields":[
+      {"fieldPath":"status","order":"ASCENDING"},
+      {"fieldPath":"lease_deadline","order":"ASCENDING"}]},
+    {"collectionGroup":"tasks","queryScope":"COLLECTION","fields":[
+      {"fieldPath":"status","order":"ASCENDING"},
+      {"fieldPath":"execution_deadline","order":"ASCENDING"}]}
+  ],
+  "fieldOverrides": [
+    {"collectionGroup":"tasks","fieldPath":"request","indexes":[]},
+    {"collectionGroup":"tasks","fieldPath":"expires_at","ttl":true,"indexes":[]},
+    {"collectionGroup":"idempotency","fieldPath":"expires_at","ttl":true,"indexes":[]}
+  ]
+}

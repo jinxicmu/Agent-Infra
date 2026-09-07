@@ -1,7 +1,27 @@
 {
+  "115": {
+    "inputs": {
+      "aspect_ratio": "16:9 (Widescreen)",
+      "megapixels": 0.98,
+      "multiple": 32
+    },
+    "class_type": "ResolutionSelector",
+    "_meta": {
+      "title": "ResolutionSelector"
+    }
+  },
+  "114": {
+    "inputs": {
+      "image": "minimax_h3_4step_benchmark.png"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "LoadImage"
+    }
+  },
   "92": {
     "inputs": {
-      "filename_prefix": "video/MiniMax_H3",
+      "filename_prefix": "video/MiniMax_H3_Turbo_4step",
       "format": "auto",
       "codec": "auto",
       "video": [
@@ -11,50 +31,7 @@
     },
     "class_type": "SaveVideo",
     "_meta": {
-      "title": "Save Video"
-    }
-  },
-  "114": {
-    "inputs": {
-      "image": "clipboard (1).png"
-    },
-    "class_type": "LoadImage",
-    "_meta": {
-      "title": "Load Image"
-    }
-  },
-  "115": {
-    "inputs": {
-      "aspect_ratio": "16:9 (Widescreen)",
-      "megapixels": 0.98,
-      "multiple": 32
-    },
-    "class_type": "ResolutionSelector",
-    "_meta": {
-      "title": "Resolution Selector"
-    }
-  },
-  "119": {
-    "inputs": {
-      "upscale_method": "nearest-exact",
-      "megapixels": 1,
-      "resolution_steps": 32
-    },
-    "class_type": "ImageScaleToTotalPixels",
-    "_meta": {
-      "title": "Scale Image to Total Pixels"
-    }
-  },
-  "120": {
-    "inputs": {
-      "image": [
-        "119",
-        0
-      ]
-    },
-    "class_type": "GetImageSize",
-    "_meta": {
-      "title": "Get Image Size"
+      "title": "SaveVideo"
     }
   },
   "105:11": {
@@ -63,7 +40,7 @@
     },
     "class_type": "VAELoader",
     "_meta": {
-      "title": "Load VAE"
+      "title": "VAELoader"
     }
   },
   "105:24": {
@@ -72,7 +49,23 @@
     },
     "class_type": "VAELoader",
     "_meta": {
-      "title": "Load VAE"
+      "title": "VAELoader"
+    }
+  },
+  "105:23": {
+    "inputs": {
+      "samples": [
+        "105:14",
+        0
+      ],
+      "vae": [
+        "105:24",
+        0
+      ]
+    },
+    "class_type": "VAEDecodeAudio",
+    "_meta": {
+      "title": "VAEDecodeAudio"
     }
   },
   "105:10": {
@@ -88,7 +81,16 @@
     },
     "class_type": "VAEDecode",
     "_meta": {
-      "title": "VAE Decode"
+      "title": "VAEDecode"
+    }
+  },
+  "105:17": {
+    "inputs": {
+      "sampler_name": "euler"
+    },
+    "class_type": "KSamplerSelect",
+    "_meta": {
+      "title": "KSamplerSelect"
     }
   },
   "105:14": {
@@ -122,7 +124,7 @@
   "105:16": {
     "inputs": {
       "model": [
-        "105:123",
+        "105:140",
         0
       ],
       "conditioning": [
@@ -132,7 +134,17 @@
     },
     "class_type": "BasicGuider",
     "_meta": {
-      "title": "Basic Guider"
+      "title": "BasicGuider"
+    }
+  },
+  "105:6": {
+    "inputs": {
+      "unet_name": "minimax_h3_fl2va_pruned_int8_convrot.safetensors",
+      "weight_dtype": "default"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "UNETLoader"
     }
   },
   "105:13": {
@@ -143,21 +155,40 @@
     },
     "class_type": "CLIPLoader",
     "_meta": {
-      "title": "Load CLIP"
+      "title": "CLIPLoader"
     }
   },
   "105:15": {
     "inputs": {
-      "noise_seed": 42
+      "noise_seed": 909194176110266
     },
     "class_type": "RandomNoise",
     "_meta": {
       "title": "RandomNoise"
     }
   },
+  "105:91": {
+    "inputs": {
+      "fps": 24,
+      "bit_depth": 8,
+      "color_space": "sRGB",
+      "images": [
+        "105:10",
+        0
+      ],
+      "audio": [
+        "105:23",
+        0
+      ]
+    },
+    "class_type": "CreateVideo",
+    "_meta": {
+      "title": "CreateVideo"
+    }
+  },
   "105:104": {
     "inputs": {
-      "prompt": "integrated_multimodal_description: For the target video, at 0.00 seconds into the target video, <Picture 1> (from [Shot 1]) is fully referenced.\n\n[Shot 1] Live-action, cinematic, a warm daylight medium close-up preserves the adult male chef's short brown hair, trimmed beard, focused expression, white double-breasted chef's coat with black piping and buttons, black trousers, and his position at the wooden cutting board established in <Picture 1>. The crowded kitchen remains unchanged, with copper pans hanging behind him, jars and ingredients on the shelves, vivid vegetables and herbs filling the right foreground, and a metal pot steaming on the stove. Beginning with the knife resting against the cucumber, he curls the fingertips of his guiding hand inward and drives the broad blade through it in a quick sequence of clean, even downward cuts. The camera pushes in with small amplitude at slow speed toward his hands as thin cucumber rounds accumulate beside the chopped carrots and other vegetables. He finishes the final slice, turns the blade sideways, and uses its flat face to gather the fresh pieces into a neat pile while steam continues to billow behind him and sunlight glints along the moving knife.\n\noverall_soundscape: The knife strikes the wooden board in a fast, regular rhythm beneath the low hiss and bubbling of the simmering pot. Vegetables scrape softly across the board, fabric shifts with the chef's arm movements, and quiet kitchen room tone continues in the background.\n\nnon_diegetic_music: N/A\n",
+      "prompt": "景别：过肩镜头/患者看医生\n运镜：切入，稳定构图\n情绪/动作：女医生抬头看向男患者，进入问诊状态。\n台词：女医生：你这些症状从什么时候开始的？\n音效：环境底噪降低，语音清晰\n时长：4s",
       "width": [
         "115",
         0
@@ -185,7 +216,7 @@
     },
     "class_type": "MiniMaxH3ImageToVideo",
     "_meta": {
-      "title": "MiniMax H3 Image to Video"
+      "title": "MiniMaxH3ImageToVideo"
     }
   },
   "105:107": {
@@ -198,7 +229,7 @@
     },
     "class_type": "ComfyMathExpression",
     "_meta": {
-      "title": "Math Expression"
+      "title": "ComfyMathExpression"
     }
   },
   "105:111": {
@@ -210,41 +241,7 @@
       "title": "Float (duration)"
     }
   },
-  "105:6": {
-    "inputs": {
-      "unet_name": "minimax_h3_fl2va_pruned_int8_convrot.safetensors",
-      "weight_dtype": "default"
-    },
-    "class_type": "UNETLoader",
-    "_meta": {
-      "title": "Load Diffusion Model"
-    }
-  },
-  "105:9": {
-    "inputs": {
-      "scheduler": "simple",
-      "steps": 4,
-      "denoise": 1,
-      "model": [
-        "105:123",
-        0
-      ]
-    },
-    "class_type": "BasicScheduler",
-    "_meta": {
-      "title": "BasicScheduler"
-    }
-  },
-  "105:17": {
-    "inputs": {
-      "sampler_name": "euler"
-    },
-    "class_type": "KSamplerSelect",
-    "_meta": {
-      "title": "KSamplerSelect"
-    }
-  },
-  "105:122": {
+  "105:130": {
     "inputs": {
       "lora_name": "minimax_h3_fl2v_turbo_4step_v1.0_768p_comfyui_bf16.safetensors",
       "strength_model": 1,
@@ -255,55 +252,36 @@
     },
     "class_type": "LoraLoaderModelOnly",
     "_meta": {
-      "title": "Load LoRA"
+      "title": "LoraLoaderModelOnly"
     }
   },
-  "105:123": {
+  "105:9": {
+    "inputs": {
+      "scheduler": "simple",
+      "steps": 4,
+      "denoise": 1,
+      "model": [
+        "105:140",
+        0
+      ]
+    },
+    "class_type": "BasicScheduler",
+    "_meta": {
+      "title": "BasicScheduler"
+    }
+  },
+  "105:140": {
     "inputs": {
       "shift_video": 6,
       "shift_audio": 3,
       "model": [
-        "105:122",
+        "105:130",
         0
       ]
     },
     "class_type": "MiniMaxH3SigmaShift",
     "_meta": {
-      "title": "MiniMax H3 Sigma Shift"
-    }
-  },
-  "105:23": {
-    "inputs": {
-      "samples": [
-        "105:14",
-        0
-      ],
-      "vae": [
-        "105:24",
-        0
-      ]
-    },
-    "class_type": "VAEDecodeAudio",
-    "_meta": {
-      "title": "VAE Decode Audio"
-    }
-  },
-  "105:91": {
-    "inputs": {
-      "fps": 24,
-      "bit_depth": 8,
-      "images": [
-        "105:10",
-        0
-      ],
-      "audio": [
-        "105:23",
-        0
-      ]
-    },
-    "class_type": "CreateVideo",
-    "_meta": {
-      "title": "Create Video"
+      "title": "MiniMaxH3SigmaShift"
     }
   }
 }

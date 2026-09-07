@@ -1,0 +1,16 @@
+[Unit]
+Description=Dedicated loopback ComfyUI for GPU worker %i
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/Documents/NOVVY/self_deployed_AI_studio/Agent-Infra
+EnvironmentFile=%h/.config/agent-infra/worker-%i.env
+ExecStart=/bin/bash worker/deploy/start_comfyui.sh
+Restart=on-failure
+RestartSec=10
+TimeoutStopSec=60
+UMask=0077
+
+[Install]
+WantedBy=default.target

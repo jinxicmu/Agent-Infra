@@ -6,3 +6,8 @@ jobs/
 logs/
 inputs/
 outputs/
+
+# Local pull-worker state and credentials
+runtime/
+*.env
+.pytest_cache/

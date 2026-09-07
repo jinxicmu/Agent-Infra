@@ -1,0 +1,17 @@
+[Unit]
+Description=Outbound AI Studio worker %i
+Wants=network-online.target comfyui@%i.service
+After=network-online.target comfyui@%i.service
+
+[Service]
+Type=simple
+WorkingDirectory=%h/Documents/NOVVY/self_deployed_AI_studio/Agent-Infra
+EnvironmentFile=%h/.config/agent-infra/worker-%i.env
+ExecStart=%h/Documents/NOVVY/self_deployed_AI_studio/Agent-Infra/.venv/bin/python -m worker.main
+Restart=on-failure
+RestartSec=10
+TimeoutStopSec=1850
+UMask=0077
+
+[Install]
+WantedBy=default.target

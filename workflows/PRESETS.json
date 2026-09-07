@@ -3,7 +3,9 @@
     "resolutions": {
       "768P": {
         "megapixels": 0.98,
-        "resolution_steps": 32
+        "resolution_steps": 32,
+        "width": 1344,
+        "height": 768
       }
     },
     "durations": {
@@ -19,15 +21,21 @@
       },
       "i2v_first": {
         "ratio_required": false,
-        "allowed": ["adaptive"]
+        "allowed": [
+          "16:9"
+        ]
       },
       "i2v_last": {
         "ratio_required": false,
-        "allowed": ["adaptive"]
+        "allowed": [
+          "adaptive"
+        ]
       },
       "fl2v": {
         "ratio_required": false,
-        "allowed": ["adaptive"]
+        "allowed": [
+          "16:9"
+        ]
       }
     }
   }

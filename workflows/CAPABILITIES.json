@@ -1,0 +1,25 @@
+{
+  "revision": "e3b6726a0b25c6585edaea0de973ac2bf6fdf926fc81e8c6d69869a071994606",
+  "files": {
+    "minimax_h3_fl2v_api.json": "e5126f876b5a888a158a211b65978ae2c88b583706f72115c77baa1ba0d7c9a4",
+    "PRESETS.json": "9836054850b2d930a735172a58f4adfc57e5aac0180460d88dc7e48b63dff061",
+    "WORKFLOW_REGISTRY.json": "1311ab671a86b00633ac6bae246bad27f95dd18be7706e38d02d1b853e2acc99",
+    "PARAMETER_MAP.fl2v.json": "cf007c9b4db36af26fe6e9a1d3eb7bf5987120fb304863ecf87ca0376d79827b",
+    "source/MiniMax H3 - Turbo 4step 768p - Sage 41s.json": "a8fb242c8efb1fdb8ff3485df46dc77d2a9231cfe1e67443933dd59c743219e1",
+    "export_h3.py": "33b512ab41bce045366ed5d3ddc128171d6bf6329b748d03965627816208be2e"
+  },
+  "model": "MiniMax-H3",
+  "workflow_file": "minimax_h3_fl2v_api.json",
+  "resolution": "768P",
+  "duration": 5,
+  "ratio": "16:9",
+  "save_node": "92",
+  "parameter_map": "PARAMETER_MAP.fl2v.json",
+  "width": 1344,
+  "height": 768,
+  "source_workflow": "source/MiniMax H3 - Turbo 4step 768p - Sage 41s.json",
+  "workflow_types": [
+    "i2v_first",
+    "fl2v"
+  ]
+}
