@@ -45,3 +45,6 @@ class CloudClient:
         return self.post(f"tasks/{assignment['task_id']}/{action}", {
             'worker_session_id': assignment['worker_session_id'],
             'lease_token': assignment['lease_token'], 'workflow_revision': self.revision, **fields})
+
+    def upload_url(self, assignment, output, content_length):
+        return self.task(assignment, 'upload-url', output=output, content_length=content_length)

@@ -38,11 +38,11 @@ Private configuration is under `/home/kakarot/.config/agent-infra/`:
 
 Actual secret values are not included in repository files or this report. Secret Manager holds `ai-studio-h3-client-keys` and `ai-studio-h3-worker-keys`.
 
-Uploads use `GCS_AUTH_MODE=gcloud`: the existing `founders@novvy.ai` CLI login impersonates the dedicated uploader account and refreshes short-lived credentials. No service-account key or copied refresh-token file was created. This credential source remains subject to the organization's user-session reauthentication policy; a revoked/expired source login requires reauthentication. Standard ADC/workload identity is also supported for a future unattended identity source.
+Uploads no longer use the local `founders@novvy.ai` CLI login, ADC, or an uploader service account. A worker presents its existing worker bearer key and active lease to Cloud Run; Cloud Run issues a 15-minute, create-only V4 signed PUT URL bound to that task's output object, media metadata and byte length. The Cloud Run runtime service account has restricted output-prefix create/read access and self `signBlob` permission. The local worker has no GCP credential.
 
 ## End-to-end evidence
 
-Two distinct five-second FL2V requests using Google's public scones sample image ran concurrently on the two GPUs. Both completed successfully, passed ffprobe validation, uploaded to GCS, and returned successful task queries. The GCS generations, checksums and object sizes were independently verified. Both MP4s contain H.264 video at 1248×832, AAC audio, and 5.167 seconds of media, independently confirmed with ffprobe.
+Two distinct five-second FL2V requests using Google's public scones sample image ran concurrently on the two GPUs. Both completed successfully, passed ffprobe validation, uploaded to GCS, and returned successful task queries. The GCS generations, checksums and object sizes were independently verified. Both MP4s contain H.264 video at 1248×832, AAC audio, and 5.167 seconds of media, independently confirmed with ffprobe. After the signed-upload rollout, a five-second I2V task also completed through the new path: `gen_99168ca170bb48c8858e3545f547437a`, with 46,586 ms inference time and 1,179 ms upload time.
 
 | Worker | Task ID | MP4 bytes | Observed inference time |
 | --- | --- | ---: | ---: |

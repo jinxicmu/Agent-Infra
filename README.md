@@ -16,7 +16,7 @@ The approved design is [the active V2 plan](AI_STUDIO_MINIMAX_H3_API_HOSTING_PLA
 
 Live API: **https://ai-studio-h3-jvljvcyoaa-uc.a.run.app**. Liveness is `GET /health`; create/query require the client bearer credential stored in the private workstation configuration.
 
-Public API remains `POST /v2/video_generation` and `GET /v2/query/video_generation?task_id=...`. Supported inputs are MiniMax-H3 first-frame I2V and first/last-frame FL2V, configurable `480P`/`544P`/`720P`/`768P` tiers, 1–15 seconds, explicit aspect ratios or `adaptive` (defaults: `768P`, 5 seconds, `16:9`). I2V/FL2V requires text and one first-frame URL; the last-frame URL is optional. Ref2VA uses text plus 1–9 reference-image URLs and defaults to `544P / 16:9 / 5s`. Create returns a task ID; clients poll the cloud for completion. Workers poll every one second, lease one task, and never prefetch.
+Public API remains `POST /v2/video_generation` and `GET /v2/query/video_generation?task_id=...`. Supported inputs are MiniMax-H3 first-frame I2V and first/last-frame FL2V, configurable `480P`/`544P`/`720P`/`768P` tiers, 1–15 seconds, explicit aspect ratios or `adaptive` (defaults: `768P`, 5 seconds, `16:9`). I2V/FL2V requires text and one first-frame URL; the last-frame URL is optional. Ref2VA uses text plus 1–9 reference-image URLs and defaults to `544P / 16:9 / 5s`. Create returns a task ID; clients poll the cloud for completion. Workers poll every one second, lease one task, and never prefetch. They carry no local GCP identity: Cloud Run validates the active lease and issues a short-lived, create-only URL for each result upload.
 
 ## Tests
 

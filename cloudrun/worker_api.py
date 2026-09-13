@@ -1,7 +1,9 @@
 from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, Request, Response
 from cloudrun.auth import worker_identity
-from cloudrun.schemas import ClaimRequest, LeaseRequest, HeartbeatRequest, RecoverRequest, FailureRequest
+from cloudrun.schemas import (ClaimRequest, LeaseRequest, HeartbeatRequest, RecoverRequest,
+                              FailureRequest, UploadUrlRequest)
+from workflows.parameters import validate_output
 
 router = APIRouter(prefix='/internal')
 
@@ -39,6 +41,16 @@ def complete(task_id: str, req: LeaseRequest, request: Request, worker=Depends(w
     result = request.app.state.verifier.verify(task)
     finished = store.mutate(task_id, worker, req.model_dump(), 'complete', result)
     return {'task_id': task_id, 'status': finished['status']}
+
+
+@router.post('/tasks/{task_id}/upload-url')
+def upload_url(task_id: str, req: UploadUrlRequest, request: Request, worker=Depends(worker_identity)):
+    """Authorize a create-only GCS PUT for this live assignment and no other object."""
+    proof = req.model_dump(exclude={'output', 'content_length'}) | {'phase': 'uploading'}
+    task = request.app.state.store.mutate(task_id, worker, proof, 'heartbeat')
+    output = req.output.model_dump()
+    validate_output(output, task['request']['resolution'], task['request']['ratio'], task['request']['duration'])
+    return request.app.state.upload_issuer.issue(task, output, req.content_length)
 
 
 @router.post('/tasks/{task_id}/fail')

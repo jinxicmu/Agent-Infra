@@ -35,6 +35,28 @@ def test_api_create_claim_complete_and_repeat(store, settings, request_body, wit
         assert denied.status_code == 404
 
 
+def test_worker_can_request_upload_url_only_for_its_live_lease(store, settings, request_body):
+    issuer = Mock()
+    issuer.issue.return_value = {'upload_url': 'https://storage.example/upload', 'headers': {}, 'expires_in_seconds': 900}
+    with TestClient(create_app(settings, store, Mock())) as api:
+        api.app.state.upload_issuer = issuer
+        client = {'Authorization': 'Bearer ' + settings.clients['client-a']}
+        worker = {'Authorization': 'Bearer ' + settings.workers['worker-a']}
+        task_id = api.post('/v2/video_generation', json=request_body, headers=client).json()['task_id']
+        task = api.post('/internal/workers/claim', json={
+            'worker_session_id': 'session', 'workflow_revision': settings.revision}, headers=worker).json()
+        body = {key: task[key] for key in ('worker_session_id', 'workflow_revision', 'lease_token')} | {
+            'content_length': 123,
+            'output': {'width': 1344, 'height': 768, 'fps': 24, 'frame_count': 124, 'duration_seconds': 124 / 24},
+        }
+        response = api.post(f'/internal/tasks/{task_id}/upload-url', json=body, headers=worker)
+        assert response.status_code == 200, response.text
+        issuer.issue.assert_called_once()
+        assert store.get(task_id)['status'] == 'uploading'
+        body['lease_token'] = 'wrong-token-that-is-long-enough'
+        assert api.post(f'/internal/tasks/{task_id}/upload-url', json=body, headers=worker).status_code == 409
+
+
 def test_auth_and_validation(store, settings, request_body):
     with TestClient(create_app(settings, store, Mock())) as api:
         assert api.post('/v2/video_generation', json=request_body).status_code == 401

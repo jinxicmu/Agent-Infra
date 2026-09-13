@@ -94,6 +94,12 @@ class HeartbeatRequest(LeaseRequest):
     comfy_prompt_id: Optional[str] = Field(default=None, max_length=128)
 
 
+class UploadUrlRequest(LeaseRequest):
+    """Proof of an active lease plus the media contract to bind into a signed PUT."""
+    output: OutputMedia
+    content_length: int = Field(gt=0, le=20 * 1024 * 1024 * 1024)
+
+
 class RecoverRequest(BaseModel):
     task_id: str = Field(pattern=r'^gen_[a-f0-9]{32}$')
     lease_token: str = Field(min_length=16, max_length=256)

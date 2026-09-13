@@ -25,13 +25,17 @@ def create_app(settings=None, store=None, verifier=None):
             from google.cloud import firestore, storage
             from cloudrun.task_store import TaskStore
             from cloudrun.result_verifier import ResultVerifier
+            from cloudrun.signed_upload import SignedUploadIssuer
             cfg = settings or Settings.from_env()
             app.state.settings = cfg
             app.state.store = TaskStore(firestore.Client(project=cfg.project, database=cfg.database), cfg)
-            app.state.verifier = ResultVerifier(storage.Client(project=cfg.project))
+            storage_client = storage.Client(project=cfg.project)
+            app.state.verifier = ResultVerifier(storage_client)
+            app.state.upload_issuer = SignedUploadIssuer(storage_client)
         yield
     app = FastAPI(title='AI Studio Cloud API', lifespan=lifespan, docs_url=None, redoc_url=None)
     app.state.settings, app.state.store, app.state.verifier = settings, store, verifier
+    app.state.upload_issuer = None
 
     @app.middleware('http')
     async def context(request: Request, call_next):

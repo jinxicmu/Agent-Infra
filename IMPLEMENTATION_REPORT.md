@@ -31,4 +31,4 @@ The legacy `app/` implementation and its dependencies are unchanged. The new pro
 
 The deployment is now live. See [the deployment report](DEPLOYMENT_REPORT_LOCAL.md) for the endpoint, resource identities, local service configuration, real dual-GPU results and restart-recovery evidence. Post-deployment automated tests pass (32 tests).
 
-The initial implementation was validated before any cloud deployment. Subsequent deployment added the `/health` alias for Cloud Run and explicit gcloud-based keyless upload credentials for this workstation. Source changes have not been pushed to GitHub.
+The initial implementation was validated before any cloud deployment. Subsequent deployment added the `/health` alias and replaced the workstation's gcloud-based upload identity with Cloud Run-issued, task-bound signed upload URLs. The deployed code and operational documentation are maintained in Git.
