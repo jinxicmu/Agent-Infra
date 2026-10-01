@@ -1,0 +1,27 @@
+subject_definitions:
+
+<Picture 1> is the exact first frame of [Shot 1] at 00:00.000. It defines the initial composition and visible state; motion develops only forward from it.
+<Subject 1> is f245f5ed-deb1-5c2d-bb8a-7d05c59b1228 from <Picture 2>; internal binding REF-ABAD435C. Preserve this identity for [Shot 1]; Preserve identity, face, age, body proportions, and hairstyle only; visible clothing, props, pose, and condition remain governed by the storyboard first frame. Do not omit, merge, swap, or transfer this identity.
+<Subject 2> is 1658b9c4-04d4-5d06-b17b-68abfb788487 from <Picture 3>; internal binding REF-69EFA961. Preserve this identity for [Shot 1]; Preserve identity, face, age, body proportions, and hairstyle only; visible clothing, props, pose, and condition remain governed by the storyboard first frame. Do not omit, merge, swap, or transfer this identity.
+
+summary:
+
+[reference generation + keyframe completion] Generate one continuous target shot featuring <Subject 1>, <Subject 2>, beginning from <Picture 1>.
+
+retention_analysis:
+
+<Picture 1>: preserve as the concrete 00:00.000 frame, then move only forward.
+<Subject 1> from <Picture 2>: fully_preserved identity; never merge, swap, omit, or transfer it.
+<Subject 2> from <Picture 3>: fully_preserved identity; never merge, swap, omit, or transfer it.
+
+detailed_description:
+
+[Shot 1] 0.000–4.000 seconds: Begin exactly from <Picture 1> at 00:00.000. Preserve its composition, camera, subject placement, pose, action state, visible costume, props, environment, and lighting; develop motion only forward from that depicted moment. <Subject 2> leans toward Carter and points at him while <Subject 1> reaches her right hand toward the phone in her pocket; keep the broken display case and counter visible. <Subject 2>: Perform public humiliation with a cold, coercive posture. Carter: Keep tense shoulders and lowered eyes under pressure. <Subject 1>: Look from Carter to <Subject 2> as determination begins to form. Slowly push laterally from a medium-wide view while keeping all three characters and the broken display case in frame. No gameplay in this shot. Maintain the shop layout, key-light direction, and character axis; <Subject 1>'s right hand reaches the phone. <Subject 1>'s right hand has reached the phone in her pocket while the confrontation continues. Cut on <Subject 1> taking out the phone into a close view. Do not show standalone gameplay, full-screen UI, pure gameplay footage, subtitles, or invented species traits. <Subject 2> (S1) says 冷酷羞辱, 缓慢、咄咄逼人, high, Derek speaks close to Carter with cold humiliation, slowly and forcefully: “Cut her off. Right now.” No subtitles., <d>[English] Cut her off. Right now.</d> No one else speaks. Each authorized English line is spoken verbatim once; there is no other verbal vocalization.
+
+overall_soundscape:
+
+Only the exact <d>[English] dialogue in detailed_description is authorized; no additional voice is allowed. Diegetic sound: Add a faint glass rattle as Derek steps closer. Add shoe friction over small glass debris as Derek points. Reference-image text, subtitles, captions, mouth poses, and implied speech are never audio sources.
+
+non_diegetic_music:
+
+Use low strings that gradually build tension.

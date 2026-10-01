@@ -1,0 +1,27 @@
+subject_definitions:
+
+<Picture 1>; internal binding REF-F2646CD8 is a visual reference only: Guides the cold realistic tone and ultra-luxury private hospital ward design. It is not a first frame or a reusable character identity.
+<Picture 2>; internal binding GREF-08550301 is a visual reference only: Guides the composition of the red-haired woman beside the sick little girl. It is not a first frame or a reusable character identity.
+<Picture 3>; internal binding GREF-368563CE is a visual reference only: Guides the visual transformation of flowing wealth into activated medical infrastructure and supply lines. It is not a first frame or a reusable character identity.
+
+summary:
+
+[reference generation + keyframe completion] Generate one continuous target shot featuring the subjects described in detailed_description, beginning from the written opening state.
+
+retention_analysis:
+
+<Picture 1>: weak_reference; retain only Guides the cold realistic tone and ultra-luxury private hospital ward design.
+<Picture 2>: weak_reference; retain only Guides the composition of the red-haired woman beside the sick little girl.
+<Picture 3>: weak_reference; retain only Guides the visual transformation of flowing wealth into activated medical infrastructure and supply lines.
+
+detailed_description:
+
+[Shot 1] 0.000–5.000 seconds: Open directly in an ultra-luxury private hospital ward with a cold realistic tone. A red-haired woman stands beside a sick little girl receiving care, watching her with determined tenderness. The camera makes a slow forward push as the woman faces the girl. Red-haired woman (S1) says Firm and gentle, spoken clearly to the child., <d>[English] No limited medical resources. I will open every channel to save you.</d> [Shot 2] 5.000–10.000 seconds: Countless golden coins surge through the ward in a controlled stream and transform into advanced medical equipment, medicine supplies, and connected high-tech hospital infrastructure. The camera tracks through the rapidly activating private medical supply lines while maintaining visual continuity with the ward. [Shot 3] 10.000–15.000 seconds: Professional medical teams enter and organize around the sick little girl, deploying the activated equipment and life-saving resources exclusively for her. The red-haired woman remains beside the girl, watching the full medical industrial chain operate. A clean English UI overlay reads: TOP TYCOON | MEDICAL INDUSTRY ACTIVATED | FULL RESOURCE SUPPORT. The camera settles on the woman and child as the ward reaches full readiness. No one else speaks and there is no other verbal vocalization.
+
+overall_soundscape:
+
+Quiet hospital ambience, soft monitor beeps, flowing coins, mechanical equipment activation, medical carts moving, footsteps, and orderly medical team activity.
+
+non_diegetic_music:
+
+N/A

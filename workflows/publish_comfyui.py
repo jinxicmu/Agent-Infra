@@ -90,7 +90,14 @@ def reference_workflow():
     doc['nodes'] = [n for n in doc['nodes'] if str(n['id']) in api or n['id'] == 116] + [shift]
     doc['extra'] = {'agent_infra_workflow': 'Ref2VA'}
     nodes = {n['id']: n for n in doc['nodes']}
-    widgets(nodes[116], [HELP + '\nRef2VA: references guide identity/content, not fixed boundary frames. Connect more LoadImage nodes to ref_images; use <Picture 1>, <Picture 2>, etc. in connection order. Turbo v0.1: 4 steps, Euler/simple, video/audio shift 12/3, match reference sizing.'], {})
+    models = {model['path']: model for model in read('REF2VA_PROVENANCE.json')['models']}
+    for node_id, directory, field in [(127, 'diffusion_models', 'unet_name'),
+                                      (145, 'loras', 'lora_name')]:
+        name = api[str(node_id)]['inputs'][field]
+        nodes[node_id]['properties']['models'] = [
+            {'name': name, 'url': models[directory + '/' + name]['url'],
+             'directory': directory}]
+    widgets(nodes[116], [HELP + '\nRef2VA: references guide identity/content, not fixed boundary frames. Connect more LoadImage nodes to ref_images; use <Picture 1>, <Picture 2>, etc. in connection order. LightX2V Ref2V v1.0: 8 steps, Euler/simple, video/audio shift 12/3, match reference sizing.'], {})
     nodes[116]['title'] = 'Start here — Ref2VA'
     nodes[137]['title'] = 'Reference 1 — upload image'
     links = []
@@ -120,7 +127,7 @@ def build():
     target.mkdir(exist_ok=True)
     for name, graph in [('I2V - Turbo 4step 768P', frame_workflow(False)),
                         ('FL2V - Turbo 4step 768P', frame_workflow(True)),
-                        ('Ref2VA - Turbo 4step 544P', reference_workflow())]:
+                        ('Ref2VA - LightX2V 8step 768P', reference_workflow())]:
         (target / (name + '.json')).write_text(json.dumps(graph, ensure_ascii=False, indent=2) + '\n')
 
 

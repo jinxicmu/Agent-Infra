@@ -15,9 +15,9 @@ def reference_request(count=1, **kwargs):
 def test_reference_defaults_and_explicit_parameters():
     implicit = validate(CreateVideoRequest(**reference_request()))
     explicit = validate(CreateVideoRequest(**reference_request(
-        workflow_type='ref2va', resolution='544P', ratio='16:9', duration=5)))
+        workflow_type='ref2va', resolution='768P', ratio='16:9', duration=5)))
     assert implicit == explicit
-    assert canvas(implicit['resolution'], implicit['ratio']) == (960, 544)
+    assert canvas(implicit['resolution'], implicit['ratio']) == (1344, 768)
     custom = validate(CreateVideoRequest(**reference_request(
         resolution='720P', ratio='9:16', duration=7)))
     assert (custom['resolution'], custom['ratio'], custom['duration']) == ('720P', '9:16', 7)
@@ -60,5 +60,5 @@ def test_reference_http_contract(store, settings):
         assert response.status_code == 200
         task = api.get('/v2/query/video_generation', params={'task_id': response.json()['task_id']}, headers=headers).json()['task']
         assert task['workflow_type'] == 'ref2va'
-        assert task['resolution'] == '544P'
+        assert task['resolution'] == '768P'
         assert task['usage']['input_image_count'] == 2

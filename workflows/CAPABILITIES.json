@@ -1,17 +1,17 @@
 {
-  "revision": "ee41720182b348be841a31cb17b7d530fee5823d8cf55c832aad2e3783decd77",
+  "revision": "0265fa57bb59930561a7b539c711f473f5e73eb1e84266a20e03ec8c57620820",
   "files": {
     "minimax_h3_fl2v_api.json": "e5126f876b5a888a158a211b65978ae2c88b583706f72115c77baa1ba0d7c9a4",
-    "PRESETS.json": "443a751f4f5276ad3d98d3f3895a55ebb48372922b77f07e8a8e17b3fec8b9c9",
+    "PRESETS.json": "f3f1e48061e7db2c578ef8b91747b436359c70457b566e6ea662ed17e17aa971",
     "WORKFLOW_REGISTRY.json": "69b2bde5e7cbdd2101b810c4845158029e07de786da27231b05ee3829da4d8f8",
     "PARAMETER_MAP.fl2v.json": "df4f71f3ad01d2ca4d2835e8341cca0c962c07c09920244cdd12f43a46d04d0d",
     "source/MiniMax H3 - Turbo 4step 768p - Sage 41s.json": "a8fb242c8efb1fdb8ff3485df46dc77d2a9231cfe1e67443933dd59c743219e1",
     "export_h3.py": "33b512ab41bce045366ed5d3ddc128171d6bf6329b748d03965627816208be2e",
     "parameters.py": "80b5a3931176fe5f0f08a651a31eefff6bd3e53441817c7bbc534b8b3e7056f7",
-    "minimax_h3_ref2va_api.json": "e52f74c263f3f5f17d525eff96575ae260212994e9598af583135b5f071f7ef5",
+    "minimax_h3_ref2va_api.json": "9894d710b7f71f5316e19224a8db8c20b0bf81d963a4ddf8d87c81e268d4dcf6",
     "PARAMETER_MAP.ref2va.json": "7cc79c88daf8ddd8c1a311a055988a8340ad5aa9137e81db5c3f7788845d1f83",
-    "REF2VA_PROVENANCE.json": "26b333b6fb0b3782956e5803d3397c697e475978499fcf85d0ef955c09268522",
-    "export_ref2va.py": "e4b383bb61b2cbc7354ed363357b1741d3943a60b2a7e9b7df5fab2fa8d1fa65",
+    "REF2VA_PROVENANCE.json": "73ead14d1e1ea40c5ff11eb8c3483f1c933e4bc7a0c6fa03a14747dcd0c2f997",
+    "export_ref2va.py": "13deae14638cab9a6804eedc29589cea6f5f67776d2feb9e6b2a312591cc4eb8",
     "source/video_minimax_h3_r2v.json": "14b30659a057547e02bdd4bbbdda3f8670aa6d7d81d1d8d99c4f9ad1e2eabc44",
     "source/video_minimax_h3_ref2v_lightx2v_turbo.json": "b906a154f9a45047714c43c038d345a6c645fda44e53f3b6f6aef23d3e179028"
   },

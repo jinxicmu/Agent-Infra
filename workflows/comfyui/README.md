@@ -4,9 +4,13 @@ Open [GPU 0](http://127.0.0.1:8188) or [GPU 1](http://127.0.0.1:8189), refresh t
 
 - **I2V - Turbo 4step 768P** — first-frame image; no last-frame conditioning.
 - **FL2V - Turbo 4step 768P** — first and last image inputs.
-- **Ref2VA - Turbo 4step 544P** — reference images and native audio output; use `<Picture 1>`, `<Picture 2>`, etc. in the prompt. Add LoadImage nodes and connect the growing `ref_images` inputs for more references.
+- **Ref2VA - LightX2V 8step 768P** — reference images and native audio output; use `<Picture 1>`, `<Picture 2>`, etc. in the prompt. Add LoadImage nodes and connect the growing `ref_images` inputs for more references.
 
 All entries contain editable prompts, images, duration and ResolutionSelector controls. The library uses ComfyUI's native megapixel/aspect controls: `480P = 0.3828125`, `544P = 0.5`, `720P = 0.861328125`, `768P = 0.98` megapixels, rounding to multiples of 32. Defaults match the deployed API workflow families. The installed demo image lets you run immediately; replace it with your own upload.
+
+The separate **Experimental Ref2VA** folder retains Alibaba PAI PDD 8-step and
+Singularity with LightX2V 4-step for comparison. See the [comparison setup and
+email-case benchmarks](../experiments/ref2va/README.md).
 
 ## Manual sessions on the shared GPUs
 

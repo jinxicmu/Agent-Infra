@@ -11,9 +11,9 @@ def test_reference_source_export_and_turbo_overrides():
     graph = json.loads((root / 'minimax_h3_ref2va_api.json').read_text())
     assert graph == export_graph()
     assert graph['127']['inputs']['unet_name'] == 'minimax_h3_ref2va_pruned_int8_convrot.safetensors'
-    assert graph['145']['inputs']['lora_name'] == 'minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors'
+    assert graph['145']['inputs']['lora_name'] == 'minimax_h3_ref2v_turbo_8step_v1.0_768p_comfyui_bf16.safetensors'
     assert graph['147']['inputs'] == {'model': ['145', 0], 'shift_video': 12, 'shift_audio': 3}
-    assert graph['124']['inputs'] == {'model': ['147', 0], 'scheduler': 'simple', 'steps': 4, 'denoise': 1}
+    assert graph['124']['inputs'] == {'model': ['147', 0], 'scheduler': 'simple', 'steps': 8, 'denoise': 1}
     assert graph['126']['inputs']['model'] == ['147', 0]
     assert graph['123']['inputs']['sampler_name'] == 'euler'
     assert graph['130']['inputs']['audio'] == ['121', 0]

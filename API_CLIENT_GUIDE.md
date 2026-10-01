@@ -168,7 +168,7 @@ This reports `workflow_type: "fl2v"` and `usage.input_image_count: 2`. Both role
 
 The query reports `workflow_type: "ref2va"` and the actual `usage.input_image_count`. References guide identity/content; they are not fixed first/last frames. Use one-based `<Picture 1>` through `<Picture N>` tags in the order the images occur in `content`. Prompt text is passed verbatim; tags are not inserted or rewritten by the service.
 
-This offering exposes **image references**. Reference video/audio uploads are not API inputs in this release. Output still contains jointly generated native audio. Ref2VA uses its own pruned INT8 checkpoint and Ref2VA Turbo 4-step v0.1 LoRA, Euler/simple, video shift 12 and audio shift 3. The defaults follow the [ModelTC Ref2VA model specifications](https://github.com/ModelTC/Minimax-H3-Turbo#1-model-specs); the graph derives from the [Comfy-Org R2V template](https://github.com/Comfy-Org/workflow_templates/blob/main/templates/video_minimax_h3_r2v.json). Inference can take longer when switching model families or adding reference images.
+This offering exposes **image references**. Reference video/audio uploads are not API inputs in this release. Output still contains jointly generated native audio. Ref2VA uses its own pruned INT8 checkpoint and LightX2V Ref2V v1.0 8-step LoRA at 768P, with Euler/simple sampling and video/audio shifts 12/3. Omitted resolution defaults to 768P; explicit supported resolutions remain honored. The graph derives from the [Comfy-Org R2V template](https://github.com/Comfy-Org/workflow_templates/blob/main/templates/video_minimax_h3_r2v.json). Inference can take longer when switching model families or adding reference images.
 
 ### Input image hosting
 

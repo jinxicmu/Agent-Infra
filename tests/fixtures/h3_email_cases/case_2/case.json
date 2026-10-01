@@ -1,0 +1,42 @@
+{
+  "title": "h3 testing case 2",
+  "source_url": "https://mail.google.com/mail/u/0/#search/subject%3A%22h3+testing+case%22/FMfcgzQhWfWkKWBDPRcXvzCsDWxvxsGf",
+  "source_date": "2026-10-01",
+  "original_parameters": {
+    "ratio": "9:16",
+    "resolution": "768P",
+    "generateAudio": true,
+    "durationSeconds": 15
+  },
+  "images": [
+    {
+      "picture": 1,
+      "file": "picture_1.png",
+      "sha256": "f63087dad6bcbfe543ee8709dec015627a552ab3813b357f2d8e744b5788434e",
+      "dimensions": [
+        1080,
+        1920
+      ]
+    },
+    {
+      "picture": 2,
+      "file": "picture_2.png",
+      "sha256": "93dc5015b8798a55a41aee1cc37ed09b500af280a690afe085f45fe9eb3217a7",
+      "dimensions": [
+        1080,
+        1920
+      ]
+    },
+    {
+      "picture": 3,
+      "file": "picture_3.png",
+      "sha256": "3cefa68a451e80413a72a88af1c182f8727121af52f66831a93776cd15b89753",
+      "dimensions": [
+        1080,
+        1920
+      ]
+    }
+  ],
+  "adaptation": "All three images are ordered visual references; no fixed first frame. The prompt describes three timed phases despite its continuous-shot summary; preserved verbatim.",
+  "status": "prepared; generation not run"
+}

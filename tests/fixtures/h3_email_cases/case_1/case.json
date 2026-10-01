@@ -1,0 +1,42 @@
+{
+  "title": "h3 testing case 1",
+  "source_url": "https://mail.google.com/mail/u/0/#search/subject%3A%22h3+testing+case%22/FMfcgzQhWfWkBQNhfCnFZnkhwhMfsFDw",
+  "source_date": "2026-10-01",
+  "original_parameters": {
+    "ratio": "9:16",
+    "resolution": "768P",
+    "generateAudio": true,
+    "durationSeconds": 4
+  },
+  "images": [
+    {
+      "picture": 1,
+      "file": "picture_1.png",
+      "sha256": "4f986edc8fd4b3ec95ee51bb5e83f940199157099ba28abeaa095587bdcad4be",
+      "dimensions": [
+        720,
+        1280
+      ]
+    },
+    {
+      "picture": 2,
+      "file": "picture_2.png",
+      "sha256": "2fdf6c2fc1316a4b5d8aeaa13615384de08c11b95e7380fdf2bc981255e9a70a",
+      "dimensions": [
+        1080,
+        1920
+      ]
+    },
+    {
+      "picture": 3,
+      "file": "picture_3.png",
+      "sha256": "eb40ee8d93609f83ec0597d531a45d5e34e25281f038897b242710bd5faa79fe",
+      "dimensions": [
+        1080,
+        1920
+      ]
+    }
+  ],
+  "adaptation": "All three images are ordered reference_image inputs. Exact first-frame conditioning combined with identity references is unsupported; evaluate first-frame fidelity manually.",
+  "status": "prepared; generation not run"
+}

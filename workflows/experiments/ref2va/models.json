@@ -1,0 +1,36 @@
+{
+  "models": [
+    {
+      "id": "lightx2v",
+      "repo": "lightx2v/Minimax-h3-Turbo",
+      "revision": "3ec17a324ced54151364f24f8b5fb6bf7e26414f",
+      "path": "loras/minimax_h3_ref2v_turbo_8step_v1.0_768p_comfyui_bf16.safetensors",
+      "url": "https://huggingface.co/lightx2v/Minimax-h3-Turbo/resolve/3ec17a324ced54151364f24f8b5fb6bf7e26414f/minimax_h3_ref2v_turbo_8step_v1.0_768p_comfyui_bf16.safetensors",
+      "size": 1956193000,
+      "sha256": "6a56f41ab4229c9dd845b9501bbd475ee57e112d846cf2e819d534a1ae928c5a"
+    },
+    {
+      "id": "pai",
+      "repo": "alibaba-pai/MiniMax-H3-Acc-LoRAs",
+      "revision": "335001fb9e5455d68a0caa18ec2e319072150328",
+      "path": "pdd_acc/MiniMax-H3-Ref2VA-Acc-8Step.safetensors",
+      "url": "https://huggingface.co/alibaba-pai/MiniMax-H3-Acc-LoRAs/resolve/335001fb9e5455d68a0caa18ec2e319072150328/MiniMax-H3-Ref2VA-Acc-8Step.safetensors",
+      "size": 1372450680,
+      "sha256": "111c82e669f6e20e628228172edf39395f1a9fc3ad049793895e542c0f55b18c"
+    },
+    {
+      "id": "singularity",
+      "repo": "WarmBloodAban/Minimax-h3_Singularity",
+      "revision": "af671d9214a6e41ab8c2f43e9f871ea56246115f",
+      "path": "diffusion_models/Minimax-h3_Singularity_ref2va_Pruned_v1.3_int8.safetensors",
+      "url": "https://huggingface.co/WarmBloodAban/Minimax-h3_Singularity/resolve/af671d9214a6e41ab8c2f43e9f871ea56246115f/Minimax-h3_Singularity_ref2va_Pruned_v1.3_int8.safetensors",
+      "size": 20967647456,
+      "sha256": "412a7b126595a958964193f3b42513d7cf2df4196ef04223a0f05e3622949cce"
+    }
+  ],
+  "custom_node": {
+    "repo": "https://github.com/Jalen-Brunson/ComfyUI-MiniMax-H3-PDD-Acc",
+    "revision": "311a65dd53832d8a5f8177a9d5fb923c09e35a90",
+    "node": "MiniMaxH3PDDAccApply"
+  }
+}

@@ -23,6 +23,6 @@ Rollback: stop new local claims, let current jobs drain or explicitly fail, then
 
 ## Ref2VA weights
 
-Run `python -m worker.deploy.download_ref2va /path/to/ComfyUI/models` from the repository with worker dependencies installed. The installer downloads the pinned Comfy-Org pruned INT8 Ref2VA checkpoint and Ref2VA Turbo 4-step v0.1 LoRA, then checks their byte sizes and SHA-256 before publishing the files. Both GPU instances share the on-disk model directory but load and execute independently. Existing Qwen text encoder and both H3 VAEs are reused. Allow about 23 GB additional disk space.
+Run `python -m worker.deploy.download_ref2va /path/to/ComfyUI/models` from the repository with worker dependencies installed. The installer downloads the pinned Comfy-Org pruned INT8 Ref2VA checkpoint and LightX2V Ref2V v1.0 8-step LoRA (plus the previous four-step adapter for local comparisons), then checks their byte sizes and SHA-256 before publishing the files. Both GPU instances share the on-disk model directory but load and execute independently. Existing Qwen text encoder and both H3 VAEs are reused. Allow about 25 GB disk space for these pinned artifacts.
 
 Publish cloud and workers with the same workflow revision after draining active tasks. Confirm ComfyUI has `MiniMaxH3ReferenceToVideo`, `MiniMaxH3SigmaShift`, and the new model filenames before reopening submissions. Test model-family switches as well as first-use inference; CPU RAM includes both GPU processes' offloaded weights.

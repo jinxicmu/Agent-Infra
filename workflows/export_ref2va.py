@@ -1,4 +1,4 @@
-"""Reviewed Comfy-Org reference graph with ModelTC Ref2VA v0.1 Turbo sampling.
+"""Reviewed Comfy-Org reference graph with LightX2V Ref2VA 8-step Turbo sampling.
 
 This is an offline, source-fenced exporter, not a general UI graph converter.
 The base template's optional 20-step branch is removed explicitly.
@@ -37,14 +37,16 @@ def export_graph():
                 _, origin, slot, *_ = links[port['link']]
                 inputs[port['name']] = [str(origin), slot]
         graph[str(node['id'])] = {'class_type': node['type'], 'inputs': inputs}
-    # Follow ModelTC's explicit Euler/simple/4-step, video12/audio3 setup.
+    # Promote the measured 8-step graph, retaining Ref2VA video/audio shifts 12/3.
     graph['123']['inputs']['sampler_name'] = 'euler'
-    graph['124']['inputs'].update(model=['147', 0], scheduler='simple', steps=4, denoise=1)
+    graph['124']['inputs'].update(model=['147', 0], scheduler='simple', steps=8, denoise=1)
     graph['126']['inputs']['model'] = ['147', 0]
     graph['147'] = {'class_type': 'MiniMaxH3SigmaShift', 'inputs': {
         'model': ['145', 0], 'shift_video': 12, 'shift_audio': 3}}
-    graph['145']['inputs']['strength_model'] = 1
-    graph['115']['inputs']['megapixels'] = .5
+    graph['145']['inputs'].update(
+        lora_name='minimax_h3_ref2v_turbo_8step_v1.0_768p_comfyui_bf16.safetensors',
+        strength_model=1)
+    graph['115']['inputs']['megapixels'] = .98
     graph['129']['inputs']['noise_seed'] = 42
     graph['136']['inputs']['ref_image_size'] = 'match'
     # Client supplies references and prompt; never execute bundled demo content.
