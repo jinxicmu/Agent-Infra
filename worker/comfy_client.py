@@ -46,3 +46,15 @@ class ComfyClient:
         # Instance must be dedicated to this GPU worker; no other owner is allowed.
         self.post('/interrupt', {})
         self.post('/queue', {'clear': True})
+
+    def free_memory(self):
+        """Release ComfyUI's model and allocator caches after a terminal task.
+
+        The `/free` endpoint may legitimately return an empty response, unlike
+        `/prompt` and `/queue`, so do not require a JSON payload here.
+        """
+        response = self.session.post(self.base + '/free', json={
+            'unload_models': True,
+            'free_memory': True,
+        }, timeout=(3, 60))
+        response.raise_for_status()

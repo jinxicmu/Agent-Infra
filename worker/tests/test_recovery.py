@@ -88,6 +88,7 @@ def test_lost_completion_response_retries_outbox_without_render(runner):
     assert runner.cloud.task.call_count == 2
     runner.comfy.submit.assert_not_called()
     assert runner.record is None
+    runner.comfy.free_memory.assert_called_once_with()
 
 
 def test_local_lease_expiry_stops_execution(runner):

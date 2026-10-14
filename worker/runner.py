@@ -110,6 +110,19 @@ class Runner:
                 logger.warning('Waiting for dedicated ComfyUI to drain')
             time.sleep(self.s.poll_seconds)
 
+    def release_comfy_memory(self):
+        """Best-effort cleanup after this worker's task reaches a terminal state.
+
+        Never make a completed cloud task look unfinished merely because the
+        local cache cleanup endpoint is temporarily unavailable.
+        """
+        try:
+            self.comfy.free_memory()
+        except requests.RequestException:
+            logger.warning('ComfyUI memory cleanup unavailable')
+        except Exception:
+            logger.exception('ComfyUI memory cleanup failed')
+
     def prepare_assignment(self):
         if self.record and self.record.get('terminal'):
             # A result response could have been lost just before the process exited.
@@ -228,6 +241,7 @@ class Runner:
                 # Stop renewal before removing the journal; a concurrent terminal response is harmless.
                 self.stop_heartbeat()
                 self.drain()
+                self.release_comfy_memory()
                 self.clear()
                 return
             except CloudError as exc:
@@ -237,6 +251,7 @@ class Runner:
                 if exc.code in ('WORKER_LEASE_EXPIRED', 'TASK_DEADLINE_EXCEEDED', 'TASK_ALREADY_TERMINAL'):
                     self.stop_heartbeat()
                     self.drain()
+                    self.release_comfy_memory()
                     self.clear()
                     return
                 if exc.status < 500 and exc.status != 429:
@@ -276,11 +291,13 @@ class Runner:
             except LeaseLost:
                 self.stop_heartbeat()
                 self.drain()
+                self.release_comfy_memory()
                 # Retain proof: recovery/terminal delivery will obtain the definitive cloud outcome.
             except CloudError as exc:
                 logger.warning('Worker API: %s', exc.code)
                 if exc.code in ('WORKER_LEASE_EXPIRED', 'TASK_DEADLINE_EXCEEDED', 'TASK_ALREADY_TERMINAL'):
                     self.drain()
+                    self.release_comfy_memory()
                     self.clear()
                 elif exc.status in (401, 403) or exc.code in ('LEASE_CONFLICT', 'WORKFLOW_REVISION_MISMATCH'):
                     # Operator intervention required; systemd may retry without losing the journal.

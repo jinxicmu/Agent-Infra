@@ -1,0 +1,14 @@
+[Unit]
+Description=Restore AI Studio GPU power limits
+Wants=nvidia-persistenced.service
+After=nvidia-persistenced.service
+ConditionPathExists=/usr/bin/nvidia-smi
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/nvidia-smi -i 0 -pl 400
+ExecStart=/usr/bin/nvidia-smi -i 1 -pl 400
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

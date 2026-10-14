@@ -1,0 +1,14 @@
+[Unit]
+Description=AI Studio durable GPU power monitor
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/Documents/NOVVY/self_deployed_AI_studio/Agent-Infra
+ExecStart=/usr/bin/python3 -m worker.power_monitor
+Restart=always
+RestartSec=2
+UMask=0077
+
+[Install]
+WantedBy=default.target
