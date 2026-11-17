@@ -107,3 +107,22 @@ def test_foreign_output_path_cannot_be_uploaded(runner):
     with pytest.raises(ExecutionFailure):
         runner.execute()
     runner.uploader.upload.assert_not_called()
+
+
+def test_cancelled_while_rendering_interrupts_comfy_and_frees_worker(runner):
+    """Client cancels a running task: the next heartbeat gets 409 TASK_ALREADY_TERMINAL, the worker interrupts
+    ComfyUI, the journal is cleared and the worker goes back to claiming. Nothing is uploaded."""
+    from worker.cloud_client import CloudError
+    terminal = CloudError(409, 'TASK_ALREADY_TERMINAL')
+    runner.record = {'task': task(), 'prompt_id': 'known', 'phase': 'running'}
+    runner.journal.write(runner.record)
+    runner.cloud.recover.side_effect = [{**task(), 'worker_session_id': 'new'}, terminal]
+    runner.cloud.task.side_effect = terminal          # heartbeat after the cancel
+    runner.comfy.history.return_value = None          # still rendering
+    runner.comfy.queue.side_effect = [['running'], [], [], []]
+    runner.cloud.claim.side_effect = lambda *_: (runner.shutdown.set(), None)[1]
+    runner.run()
+    runner.comfy.interrupt.assert_called_once_with()
+    runner.uploader.upload.assert_not_called()
+    runner.comfy.submit.assert_not_called()
+    assert runner.journal.read() is None and runner.cloud.claim.called

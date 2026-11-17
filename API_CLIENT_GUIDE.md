@@ -26,7 +26,7 @@ This is an application API key, not a Google OAuth access token or a worker key.
 
 Clients communicate only with Cloud Run. They do not connect to the workstation, ComfyUI, Firestore, or `/internal/` worker endpoints.
 
-The API is asynchronous: **submit → persist task ID → poll → retrieve output**. HTTP 200 on submission means accepted, not rendered successfully. No callback, streaming progress, cancellation, task-listing, or direct file-upload endpoint is currently provided.
+The API is asynchronous: **submit → persist task ID → poll → retrieve output**. HTTP 200 on submission means accepted, not rendered successfully. Tasks you no longer need can be cancelled (section 4a). No callback, streaming progress, task-listing, or direct file-upload endpoint is currently provided.
 
 ## 2. Supported generation settings
 
@@ -270,6 +270,19 @@ Frame alignment uses `n = max(5, round(duration * 24))`, then `frames = n + (5 -
 Timestamps are UTC Unix **seconds**; metric durations are **milliseconds**. `queue_time_ms` includes preparation until the first observed running phase, not just queue residence. `inference_time_ms` is execution-stage wall-clock time, not pure GPU sampling time. Short uploads may finish between heartbeats and show zero upload time, with that interval included in execution time. `usage.output_seconds` reflects requested duration, not exact encoded media duration or a pricing statement.
 
 Terminal task records are configured for deletion after 7 days; backend TTL deletion is asynchronous. Persist task/output metadata in your own system. Input and output storage retention is separate. There is no API for listing or searching all previous tasks.
+
+## 4a. Cancel a task you no longer need
+
+```
+POST /v2/cancel/video_generation?task_id=gen_...
+Authorization: Bearer <client key>
+```
+
+Cancel as soon as a task is superseded (for example the prompt changed and you resubmitted). A queued task never reaches a GPU. A running task is stopped on its worker within one heartbeat, and nothing is uploaded. A task that already finished is left as it is.
+
+Response (HTTP 200): `{"task_id": "gen_...", "status": "cancelled", "cancelled": true}`. For a finished task, `status` is `succeeded` or `failed` and `cancelled` is `false`. Repeating a cancel is harmless. Another client's task, or an unknown ID, returns 404 `TASK_NOT_FOUND`.
+
+After a cancel, the query endpoint returns `status: "cancelled"` with `error.code = "CANCELLED_BY_CLIENT"`.
 
 ## 5. Download or play the video
 

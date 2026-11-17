@@ -216,6 +216,22 @@ class TaskStore:
             return {**task, **changes}
         return self.transaction(mutate)
 
+    def cancel(self, task_id, client):
+        """Client cancellation. Queued tasks never reach a GPU; an active task is ended here and its worker
+        learns on the next heartbeat (409 TASK_ALREADY_TERMINAL), interrupts ComfyUI and frees the GPU.
+        Returns (task, changed). Already-terminal tasks are returned unchanged; repeating a cancel is harmless."""
+        def cancel(tx):
+            task = self.tasks.document(task_id).get(transaction=tx).to_dict()
+            if not task or task['client_id'] != client:
+                raise ApiError(404, 'TASK_NOT_FOUND')
+            if task['status'] not in ('queued', *ACTIVE):
+                return task, False
+            guard = self.workers.document(task['worker_id']).get(transaction=tx).to_dict() if task.get('worker_id') else None
+            changes = {'status': 'cancelled', 'error': {'code': 'CANCELLED_BY_CLIENT', 'message': 'Cancelled by client'}}
+            self._terminal(tx, task, guard, changes)
+            return {**task, **changes}, True
+        return self.transaction(cancel)
+
     def recover(self, worker, proof):
         self._revision(proof['workflow_revision'])
         def recover(tx):

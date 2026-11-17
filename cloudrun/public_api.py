@@ -24,6 +24,17 @@ def create(req: CreateVideoRequest, request: Request, client=Depends(client_iden
     return {'task_id': task['task_id'], 'status': 'accepted', 'mode': task['mode']}
 
 
+@router.post('/v2/cancel/video_generation')
+def cancel(task_id: str, request: Request, client=Depends(client_identity)):
+    """Cancel a task that is no longer needed. Queued tasks never use a GPU; a running task is stopped on its
+    worker within one heartbeat. Finished tasks are left as they are (`cancelled` is false)."""
+    if not re.fullmatch(r'gen_[a-f0-9]{32}', task_id):
+        raise ApiError(404, 'TASK_NOT_FOUND')
+    task, changed = request.app.state.store.cancel(task_id, client)
+    status = {'leased': 'queued', 'uploading': 'running'}.get(task['status'], task['status'])
+    return {'task_id': task_id, 'status': status, 'cancelled': changed or task['status'] == 'cancelled'}
+
+
 @router.get('/v2/query/video_generation')
 def query(task_id: str, request: Request, client=Depends(client_identity)):
     if not re.fullmatch(r'gen_[a-f0-9]{32}', task_id):

@@ -91,3 +91,42 @@ def test_admission_pause_keeps_health_and_workers_available(settings, request_bo
                             headers={'Authorization': 'Bearer ' + settings.workers['worker-a']})
         assert response.status_code == 204
         store.claim.assert_called_once()
+
+
+def test_cancel_queued_running_and_finished(store, settings, request_body):
+    verifier = Mock()
+    verifier.verify.return_value = {'gcs_generation': '1', 'checksum': {'algorithm': 'crc32c', 'value': 'AAAAAA=='}}
+    with TestClient(create_app(settings, store, verifier)) as api:
+        client = {'Authorization': 'Bearer ' + settings.clients['client-a']}
+        other = {'Authorization': 'Bearer ' + settings.clients['client-b']}
+        worker = {'Authorization': 'Bearer ' + settings.workers['worker-a']}
+        submit = lambda: api.post('/v2/video_generation', json=request_body, headers=client).json()['task_id']
+        cancel = lambda tid, h=client: api.post('/v2/cancel/video_generation', params={'task_id': tid}, headers=h)
+        claim = lambda: api.post('/internal/workers/claim', json={'worker_session_id': 'session', 'workflow_revision': settings.revision}, headers=worker)
+        running, queued, later = submit(), submit(), submit()
+
+        # Queued: cancelled before any worker sees it; repeating is harmless; other clients cannot see it.
+        assert cancel(queued, other).status_code == 404
+        assert cancel(queued).json() == {'task_id': queued, 'status': 'cancelled', 'cancelled': True}
+        assert cancel(queued).json()['cancelled'] is True
+        public = api.get('/v2/query/video_generation', params={'task_id': queued}, headers=client).json()['task']
+        assert public['status'] == 'cancelled' and public['error']['code'] == 'CANCELLED_BY_CLIENT'
+
+        # Running: the worker is fenced off on its next heartbeat and can take the next task at once.
+        task = claim().json()
+        assert task['task_id'] == running
+        proof = {k: task[k] for k in ('worker_session_id', 'workflow_revision', 'lease_token')}
+        assert api.post(f'/internal/tasks/{running}/heartbeat', json=proof | {'phase': 'running'}, headers=worker).status_code == 200
+        assert cancel(running).json()['cancelled'] is True
+        beat = api.post(f'/internal/tasks/{running}/heartbeat', json=proof | {'phase': 'running'}, headers=worker)
+        assert beat.status_code == 409 and beat.json()['error']['code'] == 'TASK_ALREADY_TERMINAL'
+        assert api.post(f'/internal/tasks/{running}/complete', json=proof, headers=worker).status_code == 409
+        verifier.verify.assert_not_called()
+        nxt = claim().json()
+        assert nxt['task_id'] == later  # the cancelled queued task was skipped
+
+        # Finished: left alone.
+        proof = {k: nxt[k] for k in ('worker_session_id', 'workflow_revision', 'lease_token')}
+        assert api.post(f'/internal/tasks/{later}/complete', json=proof, headers=worker).status_code == 200
+        assert cancel(later).json() == {'task_id': later, 'status': 'succeeded', 'cancelled': False}
+        assert cancel('gen_' + '0' * 32).status_code == 404
