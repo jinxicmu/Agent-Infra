@@ -11,11 +11,16 @@ set -euo pipefail
 : "${SCHEDULER_AUDIENCE:?Set the Cloud Run service URL as the OIDC audience}"
 : "${CLIENT_KEYS_SECRET:?Set the Secret Manager secret containing client ID to key JSON}"
 : "${WORKER_KEYS_SECRET:?Set the Secret Manager secret containing worker ID to key JSON}"
+# Admission limits: size the realtime queue to the worker fleet (2026-11-16: 20 was too small for 10+ GPUs).
+: "${REALTIME_QUEUE_LIMIT:=500}"
+: "${BATCH_QUEUE_LIMIT:=200}"
+: "${TOTAL_QUEUE_LIMIT:=700}"
+: "${CLIENT_RPM:=300}"
 gcloud run deploy "$SERVICE" --project "$GCP_PROJECT" --region "$REGION" \
   --image "$IMAGE" --service-account "$RUNTIME_SERVICE_ACCOUNT" \
   --allow-unauthenticated --cpu 1 --memory 512Mi --min-instances 1 --max-instances 2 \
   --concurrency 20 --timeout 60 \
-  --set-env-vars "GCP_PROJECT=$GCP_PROJECT,FIRESTORE_DATABASE=$FIRESTORE_DATABASE,SCHEDULER_SERVICE_ACCOUNT=$SCHEDULER_SERVICE_ACCOUNT,SCHEDULER_AUDIENCE=$SCHEDULER_AUDIENCE" \
+  --set-env-vars "GCP_PROJECT=$GCP_PROJECT,FIRESTORE_DATABASE=$FIRESTORE_DATABASE,SCHEDULER_SERVICE_ACCOUNT=$SCHEDULER_SERVICE_ACCOUNT,SCHEDULER_AUDIENCE=$SCHEDULER_AUDIENCE,REALTIME_QUEUE_LIMIT=$REALTIME_QUEUE_LIMIT,BATCH_QUEUE_LIMIT=$BATCH_QUEUE_LIMIT,TOTAL_QUEUE_LIMIT=$TOTAL_QUEUE_LIMIT,CLIENT_RPM=$CLIENT_RPM" \
   --set-secrets "CLIENT_API_KEYS_JSON=$CLIENT_KEYS_SECRET:latest,WORKER_API_KEYS_JSON=$WORKER_KEYS_SECRET:latest"
 service_url=$(gcloud run services describe "$SERVICE" --project "$GCP_PROJECT" --region "$REGION" --format='value(status.url)')
 if gcloud scheduler jobs describe "$SERVICE-expire-leases" --project "$GCP_PROJECT" --location "$REGION" >/dev/null 2>&1; then

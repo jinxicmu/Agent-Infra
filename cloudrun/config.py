@@ -4,6 +4,19 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 
+def _positive_int(name, default):
+    raw = os.getenv(name, '').strip()
+    if not raw:
+        return default
+    try:
+        value = int(raw)
+    except ValueError:
+        raise ValueError(f'{name} must be a positive integer, got {raw!r}') from None
+    if value < 1:
+        raise ValueError(f'{name} must be a positive integer, got {raw!r}')
+    return value
+
+
 @dataclass
 class Settings:
     project: str = 'novvy-dev'
@@ -37,10 +50,17 @@ class Settings:
             prefix=os.getenv('GCS_OUTPUT_PREFIX', 'generated_video_dir').strip('/'),
             scheduler_email=os.environ['SCHEDULER_SERVICE_ACCOUNT'],
             scheduler_audience=os.environ['SCHEDULER_AUDIENCE'],
+            # Admission limits are deployment capacity, not code: size them to the worker fleet.
+            realtime_limit=_positive_int('REALTIME_QUEUE_LIMIT', cls.realtime_limit),
+            batch_limit=_positive_int('BATCH_QUEUE_LIMIT', cls.batch_limit),
+            total_limit=_positive_int('TOTAL_QUEUE_LIMIT', cls.total_limit),
+            client_rpm=_positive_int('CLIENT_RPM', cls.client_rpm),
         )
         keys = list(settings.clients.values()) + list(settings.workers.values())
         if not settings.clients or not settings.workers or any(not isinstance(k, str) or len(k) < 32 for k in keys):
             raise ValueError('Configure nonempty client/worker key maps with secrets of at least 32 characters')
         if len(set(keys)) != len(keys):
             raise ValueError('Each client and worker needs a distinct credential')
+        if settings.total_limit < max(settings.realtime_limit, settings.batch_limit):
+            raise ValueError('TOTAL_QUEUE_LIMIT must be at least the larger of the realtime and batch limits')
         return settings
